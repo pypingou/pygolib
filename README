@@ -1,0 +1,11 @@
+GOutil
+======
+
+This project provides a small utility to play with the Gene Ontology.
+
+Using it you can:
+- download the latest GO annotation file.
+- extract a sub-part of the ontology
+   such as, all the term which are children of a given one
+    IE: extract all the terms related with "biological process"
+- calculate the distance between two terms
