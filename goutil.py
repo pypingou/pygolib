@@ -115,6 +115,16 @@ class GoDistanceCounter(object):
         except KeyError:
             paths.append(pred)
 
+    def __get_ancester(self, path1, path2):
+        """ For two given path, return the first common ancester.
+        :arg path1, a list of nodes.
+        :arg path2, a list of nodes.
+        """
+        for el in path1:
+            if el in path2:
+                return el
+        return None
+
     def __score_cousins(self, goid1, goid2, path1=None, path2=None):
         """ For two given GO term ID and the list of their path, return
         the score between them.
@@ -130,8 +140,8 @@ class GoDistanceCounter(object):
         if path2 is None:
             path2 = self.get_path(self.goterms[goid2])
 
-        #print goid1, path1
-        #print goid2, path2
+        print goid1, path1
+        print goid2, path2
         ancester = None
         mindist = None
         deltalevel = None
@@ -139,17 +149,17 @@ class GoDistanceCounter(object):
             step1 = path.split(',')
             for opath in path2:
                 step2 = opath.split(',')
-                inter = list(set(step1).intersection(set(step2)))
+                inter = self.__get_ancester(step1, step2)
                 if inter:
-                    index1 = step1.index(inter[0])
-                    index2 = step2.index(inter[0])
+                    index1 = step1.index(inter)
+                    index2 = step2.index(inter)
                     dist = index1 + index2
                     deltaleveltmp = abs(index1 - index2)
                     if not mindist or dist < mindist:
                         mindist = dist
-                        ancester = inter[0]
+                        ancester = inter
                         deltalevel = deltaleveltmp
-        #print ancester, deltalevel, mindist
+        print ancester, deltalevel, mindist
         return mindist + deltalevel / 10.0
 
     def __score_parents(self, goid1, goid2, path1=None, path2=None):
@@ -299,7 +309,7 @@ class GoDistanceCounter(object):
         #print term['id']
         #self.get_path(term, pred=term['id'], paths=[], verbose=True)
 
-        self.scores('9', '5')
+        self.scores('11', '0')
 
         endtime  = datetime.datetime.now()
         print "Time spent: ", endtime - starttime, "minutes"
