@@ -115,6 +115,78 @@ class GoDistanceCounter(object):
         except KeyError:
             paths.append(pred)
 
+    def __score_cousins(self, goid1, goid2, path1=None, path2=None):
+        """ For two given GO term ID and the list of their path, return
+        the score between them.
+        :arg goid1, GO term ID (ie: GO:XXXX).
+        :arg goid2, GO term ID (ie: GO:XXXX).
+        :kwarg path1, the list path from the first GO term to the top of
+        the tree, as returned by get_path().
+        :kwarg path2, the list path from the second GO term to the top
+        of the tree, as returned by get_path().
+        """
+        if path1 is None:
+            path1 = self.get_path(self.goterms[goid1])
+        if path2 is None:
+            path2 = self.get_path(self.goterms[goid2])
+
+        #print goid1, path1
+        #print goid2, path2
+        ancester = None
+        mindist = None
+        deltalevel = None
+        for path in path1:
+            step1 = path.split(',')
+            for opath in path2:
+                step2 = opath.split(',')
+                inter = list(set(step1).intersection(set(step2)))
+                if inter:
+                    index1 = step1.index(inter[0])
+                    index2 = step2.index(inter[0])
+                    dist = index1 + index2
+                    deltaleveltmp = abs(index1 - index2)
+                    if not mindist or dist < mindist:
+                        mindist = dist
+                        ancester = inter[0]
+                        deltalevel = deltaleveltmp
+        #print ancester, deltalevel, mindist
+        return mindist + deltalevel / 10.0
+
+    def __score_parents(self, goid1, goid2, path1=None, path2=None):
+        """ For two given GO term ID and the list of their path, return
+        the score between them if one is parent of the other.
+        :arg goid1, GO term ID (ie: GO:XXXX).
+        :arg goid2, GO term ID (ie: GO:XXXX).
+        :kwarg path1, the list path from the first GO term to the top of
+        the tree, as returned by get_path().
+        :kwarg path2, the list path from the second GO term to the top
+        of the tree, as returned by get_path().
+        """
+        #print goid1, path1
+        #print goid2, path2
+        if path1 is None:
+            path1 = self.get_path(self.goterms[goid1])
+        scores = []
+        for paths in path1:
+            el = paths.split(',')
+            if goid2 in el:
+                start = el.index(goid1)
+                stop = el.index(goid2)
+                score = abs(stop - start)
+                score = score + score / 10.0
+                scores.append(score)
+        if path2 is None:
+            path2 = self.get_path(self.goterms[goid2])
+        for paths in path2:
+            el = paths.split(',')
+            if goid1 in el:
+                start = el.index(goid1)
+                stop = el.index(goid2)
+                score = abs(stop - start)
+                score = score + score / 10.0
+                scores.append(score)
+        return scores
+
     def get_biological_process(self, verbose=False):
         """ From the list of GO terms, retrieve all the one which have
         for parent 'GO:0008150: biological_process'.
@@ -215,20 +287,46 @@ class GoDistanceCounter(object):
         starttime = datetime.datetime.now()
         self.get_go_data(go_file)
         self.get_go_terms()
-        self.get_biological_process()
-        print "%s terms found in the biological process branch" % \
-            len(self.biological_process.keys())
-        outputfile =  'geneontology_biological_process-%s.obo' % \
-            datetime.datetime.now().strftime('%Y%m%d')
-        write_down_ontology(self.biological_process, outputfile)
+        #self.get_biological_process()
+        #print "%s terms found in the biological process branch" % \
+            #len(self.biological_process.keys())
+        #outputfile =  'geneontology_biological_process-%s.obo' % \
+            #datetime.datetime.now().strftime('%Y%m%d')
+        #write_down_ontology(self.biological_process, outputfile)
+
+        #term = self.goterms['11']
+        #term = self.goterms['4']
+        #print term['id']
+        #self.get_path(term, pred=term['id'], paths=[], verbose=True)
+
+        self.scores('9', '5')
 
         endtime  = datetime.datetime.now()
         print "Time spent: ", endtime - starttime, "minutes"
         self.godata=None
 
+    def scores(self, id1, id2):
+        """Returns the score between two given GO terms.
+        :arg id1, identifier of a GO term (ie: GO:XXX).
+        :arg id2, identifier of a GO term (ie: GO:XXX).
+        """
+        goterm1 = self.goterms[id1]
+        path1 = self.get_path(goterm1, pred=goterm1['id'], paths=[])
+        goterm2 = self.goterms[id2]
+        path2 = self.get_path(goterm2, pred=goterm2['id'], paths=[])
+        scores = self.__score_parents(id1, id2, path1, path2)
+        if scores:
+            print "%s and %s are parents" % (id1, id2)
+            print "The score between %s and %s is: %s" % (id1, id2, min(scores))
+        else:
+            scores = self.__score_cousins(id1, id2, path1, path2)
+            if scores:
+                print "The score between %s and %s is: %s" % (id1, id2, scores)
+        
 
 if __name__ == '__main__':
     gdc = GoDistanceCounter()
     #gdc.main()
-    gdc.main(go_file='geneontology-20120117.all.obo')
+    #gdc.main(go_file='geneontology-20120117.all.obo')
+    gdc.main('test.obo')
     #gdc.main('multi_is_a.obo')
