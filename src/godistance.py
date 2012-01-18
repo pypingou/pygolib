@@ -46,10 +46,10 @@ import sys
 import urllib
 
 try:
-    from pygolib import get_logger write_down_ontology
+    from pygolib import get_logger, write_down_ontology
 except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
-    from src import get_logger write_down_ontology
+    from src import get_logger, write_down_ontology
 
 GOURL = 'http://geneontology.org/ontology/obo_format_1_2/gene_ontology_ext.obo'
 
