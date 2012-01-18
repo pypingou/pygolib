@@ -104,7 +104,10 @@ class GoDistanceCounter(object):
             parentid = termid.split('!')[0].strip()
         else:
             parentid = termid
-        pred = pred + "," + parentid
+        if pred == "":
+            pred = parentid
+        else:
+            pred = pred + "," + parentid
         parent = self.goterms[parentid]
         try:
             parent = self.get_path(parent, level=level + 1,
