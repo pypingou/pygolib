@@ -1,6 +1,7 @@
 *.pyc
 .project
 .pydev*
-test-work/
 *.log
 build/
+dist/
+MANIFEST
