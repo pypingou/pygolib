@@ -34,14 +34,16 @@ THE POSSIBILITY OF SUCH DAMAGE.
 
 import logging
 
+__version__ = '0.1.0'
+
+
 logging.basicConfig()
 LOG = logging.getLogger('golib')
+
 
 def get_logger():
     """ Return the logger. """
     return LOG
-
-
 
 def write_down_ontology(ontodata, datafile):
     """ Writes to disk the provided ontology.
