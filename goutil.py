@@ -107,8 +107,8 @@ class GoDistanceCounter(object):
         pred = pred + "," + parentid
         parent = self.goterms[parentid]
         try:
-            parent = self.get_path(parent, level=level + 1, 
-                pred=pred, paths=paths)
+            parent = self.get_path(parent, level=level + 1,
+                pred=pred, paths=paths, verbose=verbose)
         except KeyError:
             paths.append(pred)
 
@@ -192,11 +192,11 @@ class GoDistanceCounter(object):
             if isinstance(term['is_a'], list):
                 before = pred
                 for p in term['is_a']:
-                    self.__do_handle_parent(p, level, before, paths, 
-                        verbose)
+                    self.__do_handle_parent(p, level, before, paths,
+                        verbose=verbose)
             else:
                 self.__do_handle_parent(term['is_a'], level, pred, paths,
-                    verbose)
+                    verbose=verbose)
             return paths
         else:
             paths.append(pred)
@@ -222,7 +222,6 @@ class GoDistanceCounter(object):
         endtime  = datetime.datetime.now()
         print "Time spent: ", endtime - starttime, "minutes"
         self.godata=None
-
 
 
 if __name__ == '__main__':
