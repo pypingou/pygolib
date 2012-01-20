@@ -94,7 +94,7 @@ class PyGoLib(object):
 
     def get_sub_graph(self, graph, termid, verbose=False):
         """ From the list of GO terms, retrieve all the one which have
-        for parent 'GO:0008150: biological_process'.
+        for parent the provided termid.
         """
         for key in graph.keys():
             term = graph[key]
@@ -103,9 +103,13 @@ class PyGoLib(object):
             pathways = self.get_path(term, pred=term['id'], paths=[],
                 verbose=verbose)
             for el in pathways:
-                if el.endswith(termid) and \
-                        term['id'] not in self.subgraph.keys():
-                    self.subgraph[term['id']] = term
+                if termid in el:
+                    for tid in el.split(termid)[0].split(','):
+                        if tid:
+                            term = self.graph[tid]
+                            if term['id'] not in self.subgraph.keys():
+                                self.subgraph[term['id']] = term
+        return self.subgraph
 
     def get_path(self, term, level=0, pred="", paths=[], verbose=False):
         """ This is an iterative method which is used to retrieve the top
