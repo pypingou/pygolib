@@ -43,17 +43,10 @@ import os
 import sys
 
 try:
-    from pygolib import get_logger
+    from pygolib import get_logger, PyGoLib
 except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
-    from src import get_logger
-
-
-class GoDistanceCounterException(Exception):
-    """ This is the class used for all potential exception which can be
-    generated while running this project.
-    """
-    pass
+    from src import get_logger, PyGoLib
 
 
 class GoDistanceCounter(object):
@@ -68,38 +61,7 @@ class GoDistanceCounter(object):
         self.goterms = data
         if self.goterms is None:
             self.goterms = {}
-        self.biological_process = {}
         self.log = get_logger()
-
-    def __do_handle_parent(self, termid, level, pred, paths, verbose=False):
-        """ Handle the output for one parent of a term.
-        It will retrieve the GO term for the given ID, add it to the pred
-        building up the path and keep building the upper part of the
-        tree.
-        If verbose is True, it will print the line of the tree.
-
-        :arg termid, GO term identifier (GO:XXXX)
-        :arg level, the level in which we are while building the tree
-        :arg pred, the precedant part of the paths browsed
-        :arg paths, the list of paths already browsed
-        :kwarg verbose, a boolean to actually print the tree or not.
-        """
-        if verbose:
-            print " " * level, "\_", termid
-        if '!' in termid:
-            parentid = termid.split('!')[0].strip()
-        else:
-            parentid = termid
-        if pred == "":
-            pred = parentid
-        else:
-            pred = pred + "," + parentid
-        parent = self.goterms[parentid]
-        try:
-            parent = self.get_path(parent, level=level + 1,
-                pred=pred, paths=paths, verbose=verbose)
-        except KeyError:
-            paths.append(pred)
 
     def __get_ancester(self, path1, path2):
         """ For two given path, return the first common ancester.
@@ -177,52 +139,20 @@ class GoDistanceCounter(object):
                 scores.append(score)
         return scores
 
-    def get_biological_process(self, verbose=False):
-        """ From the list of GO terms, retrieve all the one which have
-        for parent 'GO:0008150: biological_process'.
-        """
-        for key in self.goterms.keys():
-            term = self.goterms[key]
-            if verbose:
-                print term['id']
-            pathways = self.get_path(term, pred=term['id'], paths=[],
-                verbose=verbose)
-            for el in pathways:
-                if el.endswith('GO:0008150') and \
-                        term['id'] not in self.biological_process.keys():
-                    self.biological_process[term['id']] = term
-
-    def get_path(self, term, level=0, pred="", paths=[], verbose=False):
-        """ This is an iterative method which is used to retrieve the top
-        parent of a given term.
-        """
-        if 'is_a' in term.keys():
-            if isinstance(term['is_a'], list):
-                before = pred
-                for p in term['is_a']:
-                    self.__do_handle_parent(p, level, before, paths,
-                        verbose=verbose)
-            else:
-                self.__do_handle_parent(term['is_a'], level, pred, paths,
-                    verbose=verbose)
-            return paths
-        else:
-            paths.append(pred)
-            return paths
-
     def scores(self, id1, id2):
         """Returns the score between two given GO terms.
         :arg id1, identifier of a GO term (ie: GO:XXX).
         :arg id2, identifier of a GO term (ie: GO:XXX).
         """
+        golib = PyGoLib(self.goterms)
         goterm1 = self.goterms[id1]
-        path1 = self.get_path(goterm1, pred=goterm1['id'], paths=[])
+        path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[])
         goterm2 = self.goterms[id2]
-        path2 = self.get_path(goterm2, pred=goterm2['id'], paths=[])
+        path2 = golib.get_path(goterm2, pred=goterm2['id'], paths=[])
         scores = self.__score_parents(id1, id2, path1, path2)
         if scores:
             scores = min(scores)
-            self.log.info("%s and %s are parents" % (id1, id2))
+            self.log.debug("%s and %s are parents" % (id1, id2))
         else:
             scores = self.__score_cousins(id1, id2, path1, path2)
         self.log.info("The score between %s and %s is: %s" % (id1, id2,
@@ -231,25 +161,16 @@ class GoDistanceCounter(object):
 
 
 if __name__ == '__main__':
+    from oboio import OboIO
     gdc = GoDistanceCounter()
     go_file = '../tests/test.obo'
 
-    starttime = datetime.datetime.now()
-    gdc.get_go_terms(go_file)
-    gdc.data = None
+    obio = OboIO()
+    terms = obio.get_graph(go_file)
+    gdc = GoDistanceCounter(terms)
     #gdc.get_biological_process()
     #print "%s terms found in the biological process branch" % \
         #len(self.biological_process.keys())
     #outputfile =  'geneontology_biological_process-%s.obo' % \
         #datetime.datetime.now().strftime('%Y%m%d')
     #write_down_ontology(self.biological_process, outputfile)
-
-    #term = self.goterms['11']
-    #term = self.goterms['4']
-    #print term['id']
-    #gdc.get_path(term, pred=term['id'], paths=[], verbose=True)
-
-    gdc.scores('11', '0')
-
-    endtime = datetime.datetime.now()
-    print "Time spent: ", endtime - starttime, "minutes"

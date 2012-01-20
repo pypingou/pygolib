@@ -44,12 +44,12 @@ import os
 import sys
 
 try:
-    from pygolib import get_logger, download_GO_graph
+    from pygolib import get_logger, download_GO_graph, PyGoLib
     from pygolib import __version__, set_logger
     from pygolib.godistance import GoDistanceCounter
     from pygolib.oboio import OboIO
 except ImportError:
-    from src import get_logger, download_GO_graph
+    from src import get_logger, download_GO_graph, PyGoLib
     from src import __version__, set_logger
     from src.godistance import GoDistanceCounter
     from src.oboio import OboIO
@@ -132,7 +132,7 @@ class GoUtilCli(object):
             ontology = download_GO_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology)
-        gdc = GoDistanceCounter(terms)
+        gdc = PyGoLib(terms)
         try:
             term = terms[self.args.term]
         except KeyError:

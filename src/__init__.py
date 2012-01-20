@@ -44,6 +44,87 @@ logging.basicConfig()
 LOG = logging.getLogger('golib')
 LOG.setLevel(logging.INFO)
 
+class PyGoLibException(Exception):
+    """ This is the class used for all potential exception which can be
+    generated while running this project.
+    """
+    pass
+
+
+class PyGoLib(object):
+    """ Utility class with some functions to play with the graph."""
+
+    def __init__(self, graph=None):
+        """ Constructor. """
+        self.graph = graph
+        if not self.graph:
+            self.graph = {}
+        self.log = get_logger()
+        self.subgraph = {}
+
+    def __do_handle_parent(self, termid, level, pred, paths, verbose=False):
+        """ Handle the output for one parent of a term.
+        It will retrieve the GO term for the given ID, add it to the pred
+        building up the path and keep building the upper part of the
+        tree.
+        If verbose is True, it will print the line of the tree.
+
+        :arg termid, GO term identifier (GO:XXXX)
+        :arg level, the level in which we are while building the tree
+        :arg pred, the precedant part of the paths browsed
+        :arg paths, the list of paths already browsed
+        :kwarg verbose, a boolean to actually print the tree or not.
+        """
+        if verbose:
+            print " " * level, "\_", termid
+        if '!' in termid:
+            parentid = termid.split('!')[0].strip()
+        else:
+            parentid = termid
+        if pred == "":
+            pred = parentid
+        else:
+            pred = pred + "," + parentid
+        parent = self.graph[parentid]
+        try:
+            parent = self.get_path(parent, level=level + 1,
+                pred=pred, paths=paths, verbose=verbose)
+        except KeyError:
+            paths.append(pred)
+
+    def get_sub_graph(self, graph, termid, verbose=False):
+        """ From the list of GO terms, retrieve all the one which have
+        for parent 'GO:0008150: biological_process'.
+        """
+        for key in graph.keys():
+            term = graph[key]
+            if verbose:
+                print term['id']
+            pathways = self.get_path(term, pred=term['id'], paths=[],
+                verbose=verbose)
+            for el in pathways:
+                if el.endswith(termid) and \
+                        term['id'] not in self.subgraph.keys():
+                    self.subgraph[term['id']] = term
+
+    def get_path(self, term, level=0, pred="", paths=[], verbose=False):
+        """ This is an iterative method which is used to retrieve the top
+        parent of a given term.
+        """
+        if 'is_a' in term.keys():
+            if isinstance(term['is_a'], list):
+                before = pred
+                for p in term['is_a']:
+                    self.__do_handle_parent(p, level, before, paths,
+                        verbose=verbose)
+            else:
+                self.__do_handle_parent(term['is_a'], level, pred, paths,
+                    verbose=verbose)
+            return paths
+        else:
+            paths.append(pred)
+            return paths
+
 
 def get_logger():
     """ Return the logger. """

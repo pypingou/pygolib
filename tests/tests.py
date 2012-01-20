@@ -41,6 +41,7 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.abspath('../'))
+from src import PyGoLib
 from src.godistance import GoDistanceCounter
 from src.oboio import OboIO
 
@@ -62,17 +63,17 @@ class GoDistanceCounterTests(unittest.TestCase):
         """ Test the get_path function. """
         obio = OboIO()
         terms = obio.get_graph(GOFILE)
-        gdc = GoDistanceCounter(terms)
+        golib = PyGoLib(terms)
         term = terms['4']
         print term['id']
         output = ['4,2,1,0']
         self.assertEqual(output, 
-            gdc.get_path(term, pred=term['id'], paths=[], verbose=True))
+            golib.get_path(term, pred=term['id'], paths=[], verbose=True))
         self.assertEqual(output, 
-            gdc.get_path(term, pred=term['id'], paths=[]))
+            golib.get_path(term, pred=term['id'], paths=[]))
         output = ['2,1,0']
         self.assertEqual(output, 
-                gdc.get_path(term, paths=[]))
+                golib.get_path(term, paths=[]))
 
     def test_scores(self):
         """ Test the scores function. """
