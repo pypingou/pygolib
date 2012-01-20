@@ -39,18 +39,14 @@ difference between the two terms.
 """
 
 
-import datetime
 import os
 import sys
-import urllib
 
 try:
     from pygolib import get_logger
 except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
     from src import get_logger
-
-GOURL = 'http://geneontology.org/ontology/obo_format_1_2/gene_ontology_ext.obo'
 
 
 class GoDistanceCounterException(Exception):

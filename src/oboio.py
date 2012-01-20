@@ -57,25 +57,6 @@ class OboIO (object):
             self.graph = {}
         self.log = get_logger()
 
-    def download_GO_graph(self, force_dl=False):
-        """ Retrieve the GO data from the specified file on the
-        filesystem is provided or from the web or using the local
-        version if dated from the day.
-
-        :kwarg force_dl, boolean to force the (re)download of the GO
-        annotation file from the geneontology.org website. Defaults to
-        False.
-        """
-        possible_go_file = 'geneontology-%s.obo' % \
-            datetime.datetime.now().strftime('%Y%m%d')
-        if not force_dl and not os.path.exists(possible_go_file):
-            self.log.info("Retrieving GO from %s" % GOURL)
-            urllib.urlretrieve(GOURL, possible_go_file)
-        else:
-            self.log.info(
-                "%s already exists, no need to re-download it" % GOURL)
-        return possible_go_file
-
     def get_go_terms(self, filename):
         """ From the GO annotation file, extract all the GO terms and
         store them into dictionnary.

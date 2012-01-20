@@ -31,10 +31,14 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import datetime
 import logging
+import os
+import urllib
 
 __version__ = '0.1.0'
 
+GOURL = 'http://geneontology.org/ontology/obo_format_1_2/gene_ontology_ext.obo'
 
 logging.basicConfig()
 LOG = logging.getLogger('golib')
@@ -43,3 +47,25 @@ LOG = logging.getLogger('golib')
 def get_logger():
     """ Return the logger. """
     return LOG
+
+def download_GO_graph(outputfile=None, force_dl=False):
+    """ Retrieve the GO data from the specified file on the
+    filesystem is provided or from the web or using the local
+    version if dated from the day.
+
+    :kwarg outputfile, name of the file in which the geneontology will
+    be saved. If not provided it will be of the form:
+    'geneontology-DATE.obo'
+    :kwarg force_dl, boolean to force the (re)download of the GO
+    annotation file from the geneontology.org website. Defaults to
+    False.
+    """
+    possible_go_file = 'geneontology-%s.obo' % \
+        datetime.datetime.now().strftime('%Y%m%d')
+    if not force_dl and not os.path.exists(possible_go_file):
+        LOG.info("Retrieving GO from %s" % GOURL)
+        urllib.urlretrieve(GOURL, possible_go_file)
+    else:
+        LOG.info(
+            "%s already exists, no need to re-download it" % GOURL)
+    return possible_go_file
