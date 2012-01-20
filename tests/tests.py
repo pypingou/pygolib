@@ -56,12 +56,12 @@ class GoDistanceCounterTests(unittest.TestCase):
     def test_get_go_terms(self):
         """ Test the get_go_terms function. """
         obio = OboIO()
-        terms = obio.get_go_terms(GOFILE)
+        terms = obio.get_graph(GOFILE)
 
     def test_get_path(self):
         """ Test the get_path function. """
         obio = OboIO()
-        terms = obio.get_go_terms(GOFILE)
+        terms = obio.get_graph(GOFILE)
         gdc = GoDistanceCounter(terms)
         term = terms['4']
         print term['id']
@@ -77,7 +77,7 @@ class GoDistanceCounterTests(unittest.TestCase):
     def test_scores(self):
         """ Test the scores function. """
         obio = OboIO()
-        terms = obio.get_go_terms(GOFILE)
+        terms = obio.get_graph(GOFILE)
         gdc = GoDistanceCounter(terms)
         self.assertEqual(5.5, gdc.scores('11', '0'))
         self.assertEqual(4.4, gdc.scores('11', '1'))

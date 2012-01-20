@@ -235,8 +235,7 @@ if __name__ == '__main__':
     go_file = '../tests/test.obo'
 
     starttime = datetime.datetime.now()
-    gdc.get_go_data(go_file)
-    gdc.get_go_terms()
+    gdc.get_go_terms(go_file)
     gdc.data = None
     #gdc.get_biological_process()
     #print "%s terms found in the biological process branch" % \

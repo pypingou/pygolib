@@ -57,9 +57,10 @@ class OboIO (object):
             self.graph = {}
         self.log = get_logger()
 
-    def get_go_terms(self, filename):
-        """ From the GO annotation file, extract all the GO terms and
-        store them into dictionnary.
+    def get_graph(self, filename):
+        """ From the OBO file, extract all the terms and store them in
+        a graph.
+        :arg filename, the name of the file to read.
         """
         stream = open(filename)
         data = stream.read()
