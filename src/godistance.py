@@ -104,7 +104,10 @@ class GoDistanceCounter(object):
                         mindist = dist
                         ancester = inter
                         deltalevel = deltaleveltmp
-        return mindist + deltalevel / 10.0
+        if mindist != None and deltalevel != None:
+            return mindist + deltalevel / 10.0
+        else:
+            return None
 
     def __score_parents(self, goid1, goid2, path1=None, path2=None):
         """ For two given GO term ID and the list of their path, return
@@ -155,8 +158,13 @@ class GoDistanceCounter(object):
             self.log.debug("%s and %s are parents" % (id1, id2))
         else:
             scores = self.__score_cousins(id1, id2, path1, path2)
-        self.log.info("The score between %s and %s is: %s" % (id1, id2,
-            scores))
+        if scores:
+            self.log.info("The score between %s and %s is: %s" % (id1,
+                id2, scores))
+        else:
+            self.log.info(
+                "The score between %s and %s could not be computed" % (
+                id1, id2))
         return scores
 
 
