@@ -40,6 +40,7 @@ difference between the two terms.
 """
 
 import argparse
+import datetime
 import os
 import sys
 
@@ -67,6 +68,7 @@ class GoUtilCli(object):
         self.set_action_download_go()
         self.set_action_score()
         self.set_action_tree()
+        self.set_action_subpart()
 
         # Let's parse now
         self.args = self.parser.parse_args()
@@ -132,7 +134,7 @@ class GoUtilCli(object):
             ontology = download_GO_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology)
-        gdc = PyGoLib(terms)
+        golib = PyGoLib(terms)
         try:
             term = terms[self.args.term]
         except KeyError:
@@ -140,7 +142,7 @@ class GoUtilCli(object):
                 self.args.term
             return 2
         print term['id']
-        gdc.get_path(term, pred=term['id'], paths=[], verbose=True)
+        golib.get_path(term, pred=term['id'], paths=[], verbose=True)
 
     def set_action_score(self):
         """ Set up the parser for the score action. """
@@ -175,9 +177,44 @@ class GoUtilCli(object):
             term1 = term1.strip()
             for term2 in terms[cnt + 1:]:
                 term2 = term2.strip()
-                gdc.scores(term1, term2)
+                if term2:
+                    gdc.scores(term1, term2)
             cnt = cnt + 1
 
+    def set_action_subpart(self):
+        """ Set up the parser for the subpart action. """
+        go_parser = self.subparsers.add_parser('subpart',
+            help = 'Extract a subpart of the GO graph',
+            description = 'This method will extract all the children '
+            'of a given GO terms.')
+        go_parser.add_argument('--ontology', default=None,
+            help = 'Name of the ontology file to use. If none is '
+            'precised, it will download the one from geneontology '
+            'directly and use that one.')
+        go_parser.add_argument('--term', default=None,
+            help = 'The GO term for which to retrieve all the children.')
+        go_parser.set_defaults(command = self.action_subpart)
+
+    def action_subpart(self):
+        """ Extract a subpart of the GO graph. """
+        self.log.debug("Action: Subpart the GO graph")
+        ontology = self.args.ontology
+        if not self.args.term:
+            print 'No GO term specified'
+            return 3
+        if not ontology:
+            ontology = download_GO_graph()
+        obio = OboIO()
+        terms = obio.get_graph(ontology)
+        golib = PyGoLib(terms)
+        subgraph = golib.get_sub_graph(terms, self.args.term)
+        print "%s terms found in the subgraph" % \
+            len(subgraph.keys())
+        if subgraph.keys():
+            outputfile =  'subgraph-%s-%s.obo' % (self.args.term,
+                datetime.datetime.now().strftime('%Y%m%d'))
+            obio.graph = subgraph
+            obio.write_down_ontology(outputfile)
 
 if __name__ == '__main__':
     cli = GoUtilCli()
