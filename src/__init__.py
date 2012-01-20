@@ -42,11 +42,21 @@ GOURL = 'http://geneontology.org/ontology/obo_format_1_2/gene_ontology_ext.obo'
 
 logging.basicConfig()
 LOG = logging.getLogger('golib')
+LOG.setLevel(logging.INFO)
 
 
 def get_logger():
     """ Return the logger. """
     return LOG
+
+
+def set_logger(quiet=False, debug=False):
+    """ Set the logger level. """
+    if debug:
+        LOG.setLevel(logging.DEBUG)
+    elif quiet:
+        LOG.setLevel(logging.WARNING)
+
 
 def download_GO_graph(outputfile=None, force_dl=False):
     """ Retrieve the GO data from the specified file on the
@@ -60,12 +70,18 @@ def download_GO_graph(outputfile=None, force_dl=False):
     annotation file from the geneontology.org website. Defaults to
     False.
     """
-    possible_go_file = 'geneontology-%s.obo' % \
-        datetime.datetime.now().strftime('%Y%m%d')
-    if not force_dl and not os.path.exists(possible_go_file):
-        LOG.info("Retrieving GO from %s" % GOURL)
-        urllib.urlretrieve(GOURL, possible_go_file)
+    LOG.debug('download_GO_graph: outputfile %s - force_dl %s' %
+        (outputfile, force_dl))
+    if not outputfile:
+        go_file = 'geneontology-%s.obo' % \
+            datetime.datetime.now().strftime('%Y%m%d')
+    else:
+        go_file = outputfile
+    LOG.debug('Downloading GO term into: %s' % go_file)
+    if force_dl or not os.path.exists(go_file):
+        LOG.info('Retrieving GO from %s' % GOURL)
+        urllib.urlretrieve(GOURL, go_file)
     else:
         LOG.info(
-            "%s already exists, no need to re-download it" % GOURL)
-    return possible_go_file
+            '%s already exists, no need to re-download it' % go_file)
+    return go_file
