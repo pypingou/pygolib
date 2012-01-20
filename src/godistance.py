@@ -46,10 +46,10 @@ import sys
 import urllib
 
 try:
-    from pygolib import get_logger, write_down_ontology
+    from pygolib import get_logger
 except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
-    from src import get_logger, write_down_ontology
+    from src import get_logger
 
 GOURL = 'http://geneontology.org/ontology/obo_format_1_2/gene_ontology_ext.obo'
 
@@ -66,10 +66,13 @@ class GoDistanceCounter(object):
     distance between two GO terms.
     """
 
-    def __init__(self):
-        """ Constructor. """
-        self.godata = None
-        self.goterms = {}
+    def __init__(self, data=None):
+        """ Constructor.
+        :arg data, the graph of ontologies
+        """
+        self.goterms = data
+        if self.goterms is None:
+            self.goterms = {}
         self.biological_process = {}
         self.log = get_logger()
 
@@ -86,7 +89,8 @@ class GoDistanceCounter(object):
         :arg paths, the list of paths already browsed
         :kwarg verbose, a boolean to actually print the tree or not.
         """
-        if verbose: print " " * level, "\_", termid
+        if verbose:
+            print " " * level, "\_", termid
         if '!' in termid:
             parentid = termid.split('!')[0].strip()
         else:
@@ -127,7 +131,6 @@ class GoDistanceCounter(object):
         if path2 is None:
             path2 = self.get_path(self.goterms[goid2])
 
-        ancester = None
         mindist = None
         deltalevel = None
         for path in path1:
@@ -185,69 +188,14 @@ class GoDistanceCounter(object):
         """
         for key in self.goterms.keys():
             term = self.goterms[key]
-            if verbose: print term['id']
+            if verbose:
+                print term['id']
             pathways = self.get_path(term, pred=term['id'], paths=[],
                 verbose=verbose)
             for el in pathways:
                 if el.endswith('GO:0008150') and \
                         term['id'] not in self.biological_process.keys():
                     self.biological_process[term['id']] = term
-
-    def get_go_data(self, go_file, force_dl=False):
-        """ Retrieve the GO data from the specified file on the
-        filesystem is provided or from the web or using the local
-        version if dated from the day.
-
-        :arg go_file, file on the filesystem containing the GO
-        annotation.
-        :kwarg force_dl, boolean to force the (re)download of the GO
-        annotation file from the geneontology.org website. Defaults to
-        False.
-        """
-        possible_go_file = 'geneontology-%s.obo' % \
-            datetime.datetime.now().strftime('%Y%m%d')
-        if not force_dl and not go_file \
-                and not os.path.exists(possible_go_file):
-            self.log.info("Retrieving GO from %s" % GOURL)
-            urllib.urlretrieve(GOURL, possible_go_file)
-            go_file = possible_go_file
-
-        if not go_file and os.path.exists(possible_go_file):
-            go_file = possible_go_file
-        
-        if not os.path.exists(go_file):
-            raise GoDistanceCounterException(
-                'No file containing the GO ontology found or provided.')
-
-        self.log.info('Reading file: %s' % go_file)
-        gostream = open(go_file)
-        self.godata = gostream.read()
-        gostream.close()
-
-    def get_go_terms(self):
-        """ From the GO annotation file, extract all the GO terms and
-        store them into dictionnary.
-        """
-        self.log.info('Loading GO terms...')
-        for entry in self.godata.split("\n\n"):
-            if '[Term]' in entry:
-                info = {}
-                rows = entry.split('\n')
-                for row in rows[1:]:
-                    if row and ':' in row:
-                        (key, value) = row.split(':', 1)
-                        key = key.strip()
-                        if key in info.keys():
-                            if isinstance(info[key], str):
-                                info[key] = [info[key], value.strip()]
-                            elif isinstance(info[key], list):
-                                info[key].append(value.strip())
-                        else:
-                            info[key] = value.strip()
-                if info['id'] not in self.goterms.keys():
-                    self.goterms[info['id']] = info
-
-        self.log.info("%s GO terms retrieved" % len(self.goterms.keys()))
 
     def get_path(self, term, level=0, pred="", paths=[], verbose=False):
         """ This is an iterative method which is used to retrieve the top
@@ -289,10 +237,8 @@ class GoDistanceCounter(object):
 
 if __name__ == '__main__':
     gdc = GoDistanceCounter()
-    #go_file=None
-    #go_file='geneontology-20120117.all.obo'
     go_file = '../tests/test.obo'
-    
+
     starttime = datetime.datetime.now()
     gdc.get_go_data(go_file)
     gdc.get_go_terms()
@@ -311,5 +257,5 @@ if __name__ == '__main__':
 
     gdc.scores('11', '0')
 
-    endtime  = datetime.datetime.now()
+    endtime = datetime.datetime.now()
     print "Time spent: ", endtime - starttime, "minutes"

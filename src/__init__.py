@@ -44,23 +44,3 @@ LOG = logging.getLogger('golib')
 def get_logger():
     """ Return the logger. """
     return LOG
-
-def write_down_ontology(ontodata, datafile):
-    """ Writes to disk the provided ontology.
-    :arg ontodata, the hash of hash containing all the ontology
-    :arg datafile, the name of the file to which write the ontology.
-    """
-    stream = open(datafile, 'w')
-    cnt = 0
-    for key in ontodata.keys():
-        stream.write('\n[Term] \n')
-        cnt = cnt + 1
-        info = ontodata[key]
-        for infokey in info.keys():
-            if isinstance(info[infokey], list):
-                for entry in info[infokey]:
-                    stream.write(infokey + ': ' + entry + '\n')
-            else:
-                stream.write(infokey + ': ' + info[infokey] + '\n')
-    stream.close()
-    print '%s terms written to the file %s' %(cnt, datafile)
