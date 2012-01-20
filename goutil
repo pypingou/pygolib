@@ -157,6 +157,10 @@ class GoUtilCli(object):
             'directly and use that one.')
         go_parser.add_argument('--terms', default=None,
             help = 'A comma ( , ) separated list of GO terms to score.')
+        go_parser.add_argument('--add-root', default=False,
+            action='store_true',
+            help='Add a root element to link the three main categories '
+            'of the gene ontology.')
         go_parser.set_defaults(command = self.action_score)
 
     def action_score(self):
@@ -168,8 +172,18 @@ class GoUtilCli(object):
             return 1
         if not ontology:
             ontology = download_GO_graph()
+        # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology)
+
+        # Add a common root element if desired
+        if self.args.add_root:
+            golib = PyGoLib(terms)
+            terms = golib.fix_GO_graph()
+
+        #term = terms['GO:0008150']
+        #golib.get_path(term, pred=term['id'], paths=[], verbose=True)
+        # Computes the scores
         gdc = GoDistanceCounter(terms)
         cnt = 0
         terms = self.args.terms.split(',')
