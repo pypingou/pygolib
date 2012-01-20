@@ -1,0 +1,107 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+This project is licensed under the New BSD License:
+
+Copyright (c) 2012, Pierre-Yves Chibon
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+* Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
+documentation and/or other materials provided with the distribution.
+* Neither the name of the Wageningen University nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ''AS IS'' AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+THE POSSIBILITY OF SUCH DAMAGE.
+"""
+
+"""
+This script computes the distance between two GO terms.
+This distance is computed as a combination of the number of edges
+between the two terms of the tree weighted by one tens of the level
+difference between the two terms.
+"""
+
+import argparse
+import os
+import sys
+
+try:
+    from pygolib import get_logger, download_GO_graph
+    from pygolib import __version__, set_logger
+    from pygolib.godistance import GoDistanceCounter
+    from pygolib.oboio import OboIO
+except ImportError:
+    from src import get_logger, download_GO_graph
+    from src import __version__, set_logger
+    from src.godistance import GoDistanceCounter
+    from src.oboio import OboIO
+
+
+class GoUtilCli(object):
+    """ Command Line Interface class for GOUtil. """
+
+    def __init__(self):
+        """ Constructor. """
+        self.name = os.path.basename(sys.argv[0])
+        self.setup_parser()
+        self.subparsers = self.parser.add_subparsers(title = 'Command')
+        self.set_action_download_go()
+        self.args = self.parser.parse_args()
+        set_logger(self.args.quiet, self.args.verbose)
+        self.log = get_logger()
+        self.log.debug(self.args)
+    
+    def setup_parser(self):
+        """ Set the main arguments. """
+        self.parser = argparse.ArgumentParser(prog="goutil")
+        self.parser.add_argument('-v', '--verbose', action = 'store_true',
+                    help = 'Run with verbose output')
+        self.parser.add_argument('-q', '--quiet', action = 'store_true',
+                    help = 'Run quietly and only print out errors')
+
+    def set_action_download_go(self):
+        """ Set up the parser for the downloadgo action. """
+        go_parser = self.subparsers.add_parser('downloadgo',
+            help = 'Download the latest Gene Ontology',
+            description = 'This command will download in the current '
+            'directory the latest version of the gene ontology as you '
+            'can find it on the geneontology.org website.')
+        go_parser.add_argument('--output', default=None,
+            help = 'Precise the name of the output file in which the'
+            'gene ontology will be stored. If not provided the file'
+            'will be looking like: geneontology-DATE.obo.')
+        go_parser.add_argument('--force-dl', default=False, 
+            action='store_true',
+            help = 'force the download of the ontology even if there is '
+            'already a file with the same name in the current directory '
+            'in which case the file will be overwriten.')
+        go_parser.set_defaults(command = self.action_download_go)
+
+    def action_download_go(self):
+        """ Download the latest GO term. """
+        self.log.debug("Action: Download GO terms")
+        download_GO_graph(outputfile=self.args.output, 
+            force_dl=self.args.force_dl)
+
+
+if __name__ == '__main__':
+    cli = GoUtilCli()
+    cli.args.command()
