@@ -16,5 +16,5 @@ setup(
     url='https://github.com/PBR/pygolib/',
     package_dir={'pygolib': 'src'},
     packages=['pygolib'],
-    #scripts=["src/pygoutil"],
+    scripts=["goutil"],
     )
