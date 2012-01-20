@@ -96,7 +96,7 @@ class OboIO (object):
         for key in self.graph.keys():
             stream.write('\n[Term] \n')
             cnt = cnt + 1
-            info = ontodata[key]
+            info = self.graph[key]
             for infokey in info.keys():
                 if isinstance(info[infokey], list):
                     for entry in info[infokey]:
