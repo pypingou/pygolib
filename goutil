@@ -64,6 +64,7 @@ class GoUtilCli(object):
         self.setup_parser()
         self.subparsers = self.parser.add_subparsers(title = 'Command')
         self.set_action_download_go()
+        self.set_action_score()
         self.args = self.parser.parse_args()
         set_logger(self.args.quiet, self.args.verbose)
         self.log = get_logger()
@@ -88,9 +89,9 @@ class GoUtilCli(object):
             help = 'Precise the name of the output file in which the'
             'gene ontology will be stored. If not provided the file'
             'will be looking like: geneontology-DATE.obo.')
-        go_parser.add_argument('--force-dl', default=False, 
+        go_parser.add_argument('--force-dl', default=False,
             action='store_true',
-            help = 'force the download of the ontology even if there is '
+            help = 'Force the download of the ontology even if there is '
             'already a file with the same name in the current directory '
             'in which case the file will be overwriten.')
         go_parser.set_defaults(command = self.action_download_go)
@@ -98,8 +99,44 @@ class GoUtilCli(object):
     def action_download_go(self):
         """ Download the latest GO term. """
         self.log.debug("Action: Download GO terms")
-        download_GO_graph(outputfile=self.args.output, 
+        download_GO_graph(outputfile=self.args.output,
             force_dl=self.args.force_dl)
+
+    def set_action_score(self):
+        """ Set up the parser for the downloadgo action. """
+        go_parser = self.subparsers.add_parser('score',
+            help = 'Evaluate the score between GO terms',
+            description = 'For a given list of GO terms, a score '
+            'representing the distance between each terms will be '
+            'returned. The terms should be sperated by a comma ( , )')
+        go_parser.add_argument('--ontology', default=None,
+            help = 'Name of the ontology file to use. If none is '
+            'precised, it will download the one from geneontology '
+            'directly and use that one.')
+        go_parser.add_argument('--terms', default=None,
+            help = 'A comma ( , ) separated list of GO terms to score.')
+        go_parser.set_defaults(command = self.action_score)
+
+    def action_score(self):
+        """ Download the latest GO term. """
+        self.log.debug("Action: Download GO terms")
+        ontology = self.args.ontology
+        if not self.args.terms:
+            print 'No GO terms specified'
+            return 1
+        if not ontology:
+            ontology = download_GO_graph()
+        obio = OboIO()
+        terms = obio.get_graph(ontology)
+        gdc = GoDistanceCounter(terms)
+        cnt = 0
+        terms = self.args.terms.split(',')
+        for term1 in terms:
+            term1 = term1.strip()
+            for term2 in terms[cnt + 1:]:
+                term2 = term2.strip()
+                gdc.scores(term1, term2)
+            cnt = cnt + 1
 
 
 if __name__ == '__main__':
