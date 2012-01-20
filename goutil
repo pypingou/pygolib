@@ -63,9 +63,14 @@ class GoUtilCli(object):
         self.name = os.path.basename(sys.argv[0])
         self.setup_parser()
         self.subparsers = self.parser.add_subparsers(title = 'Command')
+        # Subparser
         self.set_action_download_go()
         self.set_action_score()
+        self.set_action_tree()
+
+        # Let's parse now
         self.args = self.parser.parse_args()
+
         set_logger(self.args.quiet, self.args.verbose)
         self.log = get_logger()
         self.log.debug(self.args)
@@ -102,8 +107,43 @@ class GoUtilCli(object):
         download_GO_graph(outputfile=self.args.output,
             force_dl=self.args.force_dl)
 
+    def set_action_tree(self):
+        """ Set up the parser for the tree action. """
+        go_parser = self.subparsers.add_parser('tree',
+            help = 'Display the tree of ancester for a given GO term',
+            description = 'For a specified GO term, display its direct '
+            'ancesters up to the top of the tree.')
+        go_parser.add_argument('--ontology', default=None,
+            help = 'Name of the ontology file to use. If none is '
+            'precised, it will download the one from geneontology '
+            'directly and use that one.')
+        go_parser.add_argument('--term', default=None,
+            help = 'The GO term for which to print the tree.')
+        go_parser.set_defaults(command = self.action_tree)
+
+    def action_tree(self):
+        """ Show the tree of a GO term. """
+        self.log.debug("Action: Tree of a GO term")
+        ontology = self.args.ontology
+        if not self.args.term:
+            print 'No GO term specified'
+            return 1
+        if not ontology:
+            ontology = download_GO_graph()
+        obio = OboIO()
+        terms = obio.get_graph(ontology)
+        gdc = GoDistanceCounter(terms)
+        try:
+            term = terms[self.args.term]
+        except KeyError:
+            print 'GO term "%s" was not found in the ontology.' % \
+                self.args.term
+            return 2
+        print term['id']
+        gdc.get_path(term, pred=term['id'], paths=[], verbose=True)
+
     def set_action_score(self):
-        """ Set up the parser for the downloadgo action. """
+        """ Set up the parser for the score action. """
         go_parser = self.subparsers.add_parser('score',
             help = 'Evaluate the score between GO terms',
             description = 'For a given list of GO terms, a score '
@@ -118,8 +158,8 @@ class GoUtilCli(object):
         go_parser.set_defaults(command = self.action_score)
 
     def action_score(self):
-        """ Download the latest GO term. """
-        self.log.debug("Action: Download GO terms")
+        """ Score how much apparts GO terms are. """
+        self.log.debug("Action: Score GO terms")
         ontology = self.args.ontology
         if not self.args.terms:
             print 'No GO terms specified'
