@@ -83,7 +83,17 @@ class GoDistanceCounterTests(unittest.TestCase):
         self.assertEqual(5.5, gdc.scores('11', '0'))
         self.assertEqual(4.4, gdc.scores('11', '1'))
         self.assertEqual(6.0, gdc.scores('9', '5'))
+        self.assertEqual(5.1, gdc.scores('7', '5'))
 
+    def test_alt_id(self):
+        """ Test that a GO term with an alt_id is added to the list. """
+        obio = OboIO()
+        terms = obio.get_graph(GOFILE)
+        gdc = GoDistanceCounter(terms)
+        term = terms['12']
+        self.assertEqual('7', term['id'])
+        gdc = GoDistanceCounter(terms)
+        self.assertEqual(5.1, gdc.scores('12', '5'))
 
 suite = unittest.TestLoader().loadTestsFromTestCase(GoDistanceCounterTests)
 unittest.TextTestRunner(verbosity=2).run(suite)

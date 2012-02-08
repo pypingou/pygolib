@@ -36,6 +36,7 @@ is_a: 3
 id: 7
 name: E
 is_a: 3
+alt_id: 12
 
 [Term]
 id: 8
