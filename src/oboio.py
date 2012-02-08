@@ -58,10 +58,12 @@ class OboIO (object):
             self.graph = {}
         self.log = get_logger()
 
-    def get_graph(self, filename):
+    def get_graph(self, filename, check_unique=False):
         """ From the OBO file, extract all the terms and store them in
         a graph.
         :arg filename, the name of the file to read.
+        :kwarg unique, a boolean to specify wether we should check that
+        IDs are unique in the ontology. Influences speed greatly.
         """
         stream = open(filename)
         data = stream.read()
@@ -82,16 +84,36 @@ class OboIO (object):
                                 info[key].append(value.strip())
                         else:
                             info[key] = value.strip()
-                if info['id'] not in self.graph.keys():
+
+                if check_unique and info['id'] not in self.graph.keys():
                     self.graph[info['id']] = info
+                elif not check_unique:
+                    self.graph[info['id']] = info
+                else:
+                    self.log.warning('%s is present several time in the ontology' %
+                    info['id'])
+
                 if 'alt_id' in info:
                     alt_ids = info['alt_id']
-                    if isinstance(alt_ids, str) and alt_ids not in self.graph.keys():
-                        self.graph[alt_ids] = info
+                    if isinstance(alt_ids, str):
+                        if check_unique and alt_ids not in self.graph.keys():
+                            self.graph[alt_ids] = info
+                        elif not check_unique:
+                            self.graph[alt_ids] = info
+                        else:
+                            self.log.warning(
+                            '%s is present several time in the ontology' %
+                            info['id'])
                     elif isinstance(alt_ids, list):
                         for ids in alt_ids:
-                            if ids not in self.graph.keys():
+                            if check_unique and ids not in self.graph.keys():
                                 self.graph[ids] = info
+                            elif not check_unique:
+                                self.graph[ids] = info
+                            else:
+                                self.log.warning(
+                                '%s is present several time in the ontology' %
+                                info['id'])
         self.log.info("%s GO terms retrieved" % len(self.graph.keys()))
         return self.graph
 
