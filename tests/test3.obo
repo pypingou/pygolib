@@ -1,0 +1,47 @@
+[Term]
+id: 0005575
+name: Cellular component
+
+[Term]
+id: 0043226
+name: Organelle
+is_a: 0005575
+
+[Term]
+id: 0043227
+name: Membrane-bound
+is_a: 0043226
+
+[Term]
+id: 0043231
+name: Intracellular membrane-bound
+is_a: 0043227
+is_a: 0043229
+
+[Term]
+id: 0043229
+name: Intracellular organelle
+is_a: 0043226
+part_of: 0044424
+
+[Term]
+id: 0005622
+name: Intracellular
+is_a: 0044464
+
+[Term]
+id: 0044424
+name: Intracellylar part
+is_a: 0044464
+part_of: 0005622
+
+[Term]
+id: 0044464
+name: Cell part
+is_a: 0005575
+part_of: 0005623
+
+[Term]
+id: 0005623
+name: Cell
+is_a: 0005575
