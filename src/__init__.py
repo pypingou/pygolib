@@ -62,7 +62,8 @@ class PyGoLib(object):
         self.log = get_logger()
         self.subgraph = {}
 
-    def __do_handle_parent(self, termid, level, pred, paths, verbose=False):
+    def __do_handle_parent(self, termid, level, pred, paths,
+        verbose=False, details=False, rtype=""):
         """ Handle the output for one parent of a term.
         It will retrieve the GO term for the given ID, add it to the pred
         building up the path and keep building the upper part of the
@@ -81,16 +82,18 @@ class PyGoLib(object):
             parentid = termid.split('!')[0].strip()
         else:
             parentid = termid
+
         if pred == "":
             pred = parentid
         else:
-            pred = pred + "," + parentid
+            if details:
+                pred = '%s,%s,%s' % (pred, rtype, parentid)
+            else:
+                pred = '%s,%s' % (pred, parentid)
         parent = self.graph[parentid]
-        try:
-            parent = self.get_path(parent, level=level + 1,
-                pred=pred, paths=paths, verbose=verbose)
-        except KeyError:
-            paths.append(pred)
+        self.get_path(parent, level=level + 1,
+                pred=pred, paths=paths, verbose=verbose,
+                details=details)
 
     def fix_GO_graph(self):
         """ Add a root node to the main three categories. This way we
@@ -125,7 +128,8 @@ class PyGoLib(object):
                                 self.subgraph[term['id']] = term
         return self.subgraph
 
-    def get_path(self, term, level=0, pred="", paths=[], verbose=False):
+    def get_path(self, term, level=0, pred="", paths=[], verbose=False,
+        details=False):
         """ This is an iterative method which is used to retrieve the top
         parent of a given term.
         """
@@ -134,15 +138,23 @@ class PyGoLib(object):
                 before = pred
                 for p in term['is_a']:
                     self.__do_handle_parent(p, level, before, paths,
-                        verbose=verbose)
+                        verbose=verbose, details=details, rtype='is_a')
             else:
                 self.__do_handle_parent(term['is_a'], level, pred, paths,
-                    verbose=verbose)
-            return paths
-        else:
+                    verbose=verbose, details=details, rtype='is_a')
+        if details and 'part_of' in term.keys():
+            if isinstance(term['part_of'], list):
+                before = pred
+                for p in term['part_of']:
+                    self.__do_handle_parent(p, level, before, paths,
+                        verbose=verbose, details=details, rtype='part_of')
+            else:
+                self.__do_handle_parent(term['part_of'], level, pred, paths,
+                    verbose=verbose, details=details, rtype='part_of')
+        if 'is_a' not in term.keys() and 'part_of' not in term.keys():
             paths.append(pred)
-            return paths
-
+        return paths
+    
 
 def get_logger():
     """ Return the logger. """
