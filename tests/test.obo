@@ -42,6 +42,8 @@ alt_id: 12
 id: 8
 name: H
 is_a: 6
+alt_id: 13
+alt_id: 14
 
 [Term]
 id: 9
