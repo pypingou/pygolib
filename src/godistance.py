@@ -152,12 +152,17 @@ class GoDistanceCounter(object):
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[])
         goterm2 = self.goterms[id2]
         path2 = golib.get_path(goterm2, pred=goterm2['id'], paths=[])
-        scores = self.__score_parents(id1, id2, path1, path2)
+        # We use goterm['id'] instead of the id provided to take into
+        # account alt_id which are in the list of goterms but not in the
+        # paths. Via goterm['id'] we get the 'normal' GO term identifier.
+        scores = self.__score_parents(goterm1['id'], goterm2['id'],
+            path1, path2)
         if scores:
             scores = min(scores)
             self.log.debug("%s and %s are parents" % (id1, id2))
         else:
-            scores = self.__score_cousins(id1, id2, path1, path2)
+            scores = self.__score_cousins(goterm1['id'], goterm2['id'],
+                path1, path2)
         return scores
 
 
