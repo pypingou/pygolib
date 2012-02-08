@@ -45,7 +45,7 @@ from src import PyGoLib
 from src.godistance import GoDistanceCounter
 from src.oboio import OboIO
 
-GOFILE = 'test.obo'
+GOFILE = '%s/test.obo' % os.path.dirname(__file__)
 
 class GoDistanceCounterTests(unittest.TestCase):
     """ GoDistanceCounter tests. """
