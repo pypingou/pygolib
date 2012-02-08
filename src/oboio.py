@@ -47,6 +47,7 @@ except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
     from src import get_logger
 
+
 class OboIO (object):
     """ This class handles the reading and writing of OBO files. """
 
@@ -83,7 +84,14 @@ class OboIO (object):
                             info[key] = value.strip()
                 if info['id'] not in self.graph.keys():
                     self.graph[info['id']] = info
-
+                if 'alt_id' in info:
+                    alt_ids = info['alt_id']
+                    if isinstance(alt_ids, str) and alt_ids not in self.graph.keys():
+                        self.graph[alt_ids] = info
+                    elif isinstance(alt_ids, list):
+                        for ids in alt_ids:
+                            if ids not in self.graph.keys():
+                                self.graph[ids] = info
         self.log.info("%s GO terms retrieved" % len(self.graph.keys()))
         return self.graph
 
