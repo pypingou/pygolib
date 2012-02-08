@@ -114,7 +114,8 @@ class GoUtilCli(object):
         if not ontology:
             ontology = download_GO_graph()
         obio = OboIO()
-        terms = obio.get_graph(ontology)
+        terms = obio.get_graph(ontology,
+            check_unique=self.args.check_unique)
         golib = PyGoLib(terms)
         try:
             term = terms[self.args.term]
@@ -137,6 +138,11 @@ class GoUtilCli(object):
             'known about a given GO term in the provided ontology.')
         go_parser.add_argument('term', default=None,
             help = 'The GO term for which to print the information.')
+        go_parser.add_argument('--check-unique', default=False,
+            action='store_true',
+            help = 'Check for duplicate term while loading the ontology. '
+            'This will greatly increase the loading time but will warn '
+            'you if an identifier is double.')
         go_parser.add_argument('--ontology', default=None,
             help = 'Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
@@ -157,6 +163,11 @@ class GoUtilCli(object):
             'ancesters up to the top of the tree.')
         go_parser.add_argument('term', default=None,
             help = 'The GO term for which to print the tree.')
+        go_parser.add_argument('--check-unique', default=False,
+            action='store_true',
+            help = 'Check for duplicate term while loading the ontology. '
+            'This will greatly increase the loading time but will warn '
+            'you if an identifier is double.')
         go_parser.add_argument('--ontology', default=None,
             help = 'Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
@@ -173,7 +184,8 @@ class GoUtilCli(object):
         if not ontology:
             ontology = download_GO_graph()
         obio = OboIO()
-        terms = obio.get_graph(ontology)
+        terms = obio.get_graph(ontology,
+            check_unique=self.args.check_unique)
         golib = PyGoLib(terms)
         try:
             term = terms[self.args.term]
@@ -197,6 +209,11 @@ class GoUtilCli(object):
             'directly and use that one.')
         go_parser.add_argument('--terms', default=None,
             help = 'A comma ( , ) separated list of GO terms to score.')
+        go_parser.add_argument('--check-unique', default=False,
+            action='store_true',
+            help = 'Check for duplicate term while loading the ontology. '
+            'This will greatly increase the loading time but will warn '
+            'you if an identifier is double.')
         go_parser.add_argument('--add-root', default=False,
             action='store_true',
             help='Add a root element to link the three main categories '
@@ -214,7 +231,8 @@ class GoUtilCli(object):
             ontology = download_GO_graph()
         # Load graph
         obio = OboIO()
-        terms = obio.get_graph(ontology)
+        terms = obio.get_graph(ontology,
+            check_unique=self.args.check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -251,6 +269,11 @@ class GoUtilCli(object):
             'of a given GO terms.')
         go_parser.add_argument('term', default=None,
             help = 'The GO term for which to retrieve all the children.')
+        go_parser.add_argument('--check-unique', default=False,
+            action='store_true',
+            help = 'Check for duplicate term while loading the ontology. '
+            'This will greatly increase the loading time but will warn '
+            'you if an identifier is double.')
         go_parser.add_argument('--ontology', default=None,
             help = 'Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
@@ -267,7 +290,8 @@ class GoUtilCli(object):
         if not ontology:
             ontology = download_GO_graph()
         obio = OboIO()
-        terms = obio.get_graph(ontology)
+        terms = obio.get_graph(ontology,
+            check_unique=self.args.check_unique)
         golib = PyGoLib(terms)
         subgraph = golib.get_sub_graph(terms, self.args.term)
         print "%s terms found in the subgraph" % \
