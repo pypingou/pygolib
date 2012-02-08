@@ -253,12 +253,12 @@ class GoUtilCli(object):
                     scores = gdc.scores(term1, term2)
                     if scores:
                         self.log.info(
-                            "The score between %s and %s is: %s" % (id1,
-                            id2, scores))
+                            "The score between %s and %s is: %s" % (term1,
+                            term2, scores))
                     else:
                         self.log.info(
                             "The score between %s and %s could not be computed" % (
-                            id1, id2))
+                            term1, term2))
             cnt = cnt + 1
 
     def set_action_subpart(self):
