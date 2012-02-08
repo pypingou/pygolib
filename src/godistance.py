@@ -158,13 +158,13 @@ class GoDistanceCounter(object):
             self.log.debug("%s and %s are parents" % (id1, id2))
         else:
             scores = self.__score_cousins(id1, id2, path1, path2)
-        if scores:
-            self.log.info("The score between %s and %s is: %s" % (id1,
-                id2, scores))
-        else:
-            self.log.info(
-                "The score between %s and %s could not be computed" % (
-                id1, id2))
+        #if scores:
+            #self.log.info("The score between %s and %s is: %s" % (id1,
+                #id2, scores))
+        #else:
+            #self.log.info(
+                #"The score between %s and %s could not be computed" % (
+                #id1, id2))
         return scores
 
 
