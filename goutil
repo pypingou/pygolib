@@ -122,8 +122,12 @@ class GoUtilCli(object):
             print 'GO term "%s" was not found in the ontology.' % \
                 self.args.term
             return 2
+        default = ['id', 'name']
+        for key in default:
+            print '%s : \t %s' % (key, term[key])
         for key in term.keys():
-            print key, term[key]
+            if key not in default:
+                print '%s : \t %s' % (key, term[key])
 
     def set_action_info(self):
         """ Set up the parser for the downloadgo action. """
