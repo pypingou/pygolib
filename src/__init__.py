@@ -104,9 +104,12 @@ class PyGoLib(object):
         root = {'id' : info['id'], 'info' : info}
         self.graph[root['id']] = root
         for goid in ['GO:0008150', 'GO:0005575', 'GO:0003674']:
-            bio_proc = self.graph[goid]
-            bio_proc['is_a'] = 'GO:OOOO000'
-            self.graph[goid] = bio_proc
+            try:
+                bio_proc = self.graph[goid]
+                bio_proc['is_a'] = 'GO:OOOO000'
+                self.graph[goid] = bio_proc
+            except KeyError:
+                pass
         return self.graph
 
     def get_sub_graph(self, graph, termid, verbose=False):
