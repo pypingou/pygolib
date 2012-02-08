@@ -197,15 +197,18 @@ class Gsesame(object):
         :arg id2, identifier of a GO term (ie: GO:XXX).
         """
         golib = PyGoLib(self.goterms)
+        #golib.fix_GO_graph()
         goterm1 = self.goterms[id1]
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[],
             details=True)
+        #print goterm1['id'], len(path1)
         ancester1 = self.__get_all_ancesters(path1)
         semantic_values1 = self.semantic_values(goterm1['id'])
 
         goterm2 = self.goterms[id2]
         path2 = golib.get_path(goterm2, pred=goterm2['id'], paths=[],
             details=True)
+        #print goterm2['id'], len(path2)
         ancester2 = self.__get_all_ancesters(path2)
         semantic_values2 = self.semantic_values(goterm2['id'])
         
@@ -228,8 +231,13 @@ if __name__ == '__main__':
     obio = OboIO()
     terms = obio.get_graph(go_file)
     gdc = Gsesame(terms)
-    #gdc.scores('GO:0043231', 'GO:0043227') # score = 0.579
-    #gdc.scores('0005622','0043227')
     print gdc.scores('0043229','0043231')
     print gdc.semantic_value('0043231')
+    
+    go_file = '../tests/test3.obo'
+    terms = obio.get_graph(go_file)
+    gdc = Gsesame(terms)
+    print gdc.scores('0043229','0043231')
+    print gdc.semantic_value('0043231')
+    print gdc.semantic_value('0043229')
     
