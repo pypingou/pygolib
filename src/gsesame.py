@@ -49,9 +49,9 @@ except ImportError:
     from src import get_logger, PyGoLib
 
 
-class Gsesame(object):
+class GsesameGO(object):
     """ This class re-implement in python the algorithm used in the
-    g-sesame program.
+    g-sesame program to compare two GO term to each other.
     see: http://bioinformatics.clemson.edu/G-SESAME/
     """
 
@@ -222,22 +222,78 @@ class Gsesame(object):
             + sum(semantic_values2.values()))
         return score
 
+class GsesameGene(object):
+    """ This class re-implement in python the algorithm used in the
+    g-sesame program to compare two genes based on their GO annotation.
+    see: http://bioinformatics.clemson.edu/G-SESAME/
+    """
+
+    def __init__(self, data=None):
+        """ Constructor.
+        :arg data, the graph of ontologies
+        """
+        self.goterms = data
+        if self.goterms is None:
+            self.goterms = {}
+        self.log = get_logger()
+
+    def __get_go_score(self, goid, golist):
+        """ For a given GO term return the semantic similarity between
+        this GO term and the given GO list.
+        :arg goid, GO term identifier (ie: GO:XXXXX)
+        :arg golist, list of GO terms
+        """
+        scores = []
+        sesamego = GsesameGO(self.goterms)
+        for go in golist:
+            scores.append(sesamego.scores(goid, go))
+        return max(scores)
+
+    def scores(self, gene1, gene2):
+        """ For two list of GO term associated with two genes, computes
+        the semantic similarities of the genes.
+        :arg gene1, list of GO term associated with the gene1
+        :arg gene2, list of GO term associated with the gene2
+        """
+        sim1 = 0
+        for go in gene1:
+            sim1 = sim1 + self.__get_go_score(go, gene2)
+        sim2 = 0
+        for go in gene2:
+            sim2 = sim2 + self.__get_go_score(go, gene1)
+        score = (sim1 + sim2) / (len(gene1) + len(gene2))
+        return score
 
 if __name__ == '__main__':
     from oboio import OboIO
+    from src import download_GO_graph
     from src import get_logger, PyGoLib
-    go_file = '../tests/test2.obo'
+    #go_file = '../tests/test2.obo'
 
     obio = OboIO()
-    terms = obio.get_graph(go_file)
-    gdc = Gsesame(terms)
-    print gdc.scores('0043229','0043231')
-    print gdc.semantic_value('0043231')
+    ontology = download_GO_graph()
+    terms = obio.get_graph(ontology)
+    gdc = GsesameGO(terms)
+    print 'Score for: GO:0043229 - GO:0043231'
+    print gdc.scores('GO:0043231','GO:0043229')
+    print 'Score for: GO:0005739 - GO:0005777'
+    print gdc.scores('GO:0005739','GO:0005777')
+    #print gdc.semantic_value('GO:0043231')
+    sesamegene = GsesameGene(terms)
+    gene1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
+        'GO:0008270', 'GO:0004023']
+    gene2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
+        'GO:0020037']
+    print 'Semantic similarities between the two genes:'
+    print sesamegene.scores(gene1, gene2)
     
-    go_file = '../tests/test3.obo'
-    terms = obio.get_graph(go_file)
-    gdc = Gsesame(terms)
-    print gdc.scores('0043229','0043231')
-    print gdc.semantic_value('0043231')
-    print gdc.semantic_value('0043229')
+    #ontology = '../tests/test2.obo'
+    #obio = OboIO()
+    #terms = obio.get_graph(ontology)
+    #gdc = GsesameGO(terms)
+    #print 'Score for: GO:0043229 - GO:0043231'
+    #print gdc.scores('0043229','0043231')
+    #print gdc.semantic_value('0043231')
+    #print gdc.semantic_value('0043229')
+
     
