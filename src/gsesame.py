@@ -177,8 +177,8 @@ class GsesameGO(object):
                 semantic_values[ancester] = 1
                 continue
             tmp_score = []
-            tmp_cnt = 1
             for item in path1:
+                tmp_cnt = 1
                 if ancester in item:
                     path_el = item.split(',')
                     ind = path_el.index(ancester)
@@ -274,18 +274,19 @@ if __name__ == '__main__':
     ontology = download_GO_graph()
     terms = obio.get_graph(ontology)
     gdc = GsesameGO(terms)
-    print 'Score for: GO:0043229 - GO:0043231'
-    print gdc.scores('GO:0043231','GO:0043229')
+    #print 'Score for: GO:0043229 - GO:0043231'
+    #print gdc.scores('GO:0043231','GO:0043229')
     print 'Score for: GO:0005739 - GO:0005777'
     print gdc.scores('GO:0005739','GO:0005777')
-    #print gdc.semantic_value('GO:0043231')
-    sesamegene = GsesameGene(terms)
-    gene1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
-        'GO:0008270', 'GO:0004023']
-    gene2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
-        'GO:0020037']
-    print 'Semantic similarities between the two genes:'
-    print sesamegene.scores(gene1, gene2)
+    print 'GO:0005739', gdc.semantic_value('GO:0005739')
+    print 'GO:0005777', gdc.semantic_value('GO:0005777')
+    #sesamegene = GsesameGene(terms)
+    #gene1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
+        #'GO:0008270', 'GO:0004023']
+    #gene2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
+        #'GO:0020037']
+    #print 'Semantic similarities between the two genes:'
+    #print sesamegene.scores(gene1, gene2)
     
     #ontology = '../tests/test2.obo'
     #obio = OboIO()
