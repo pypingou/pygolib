@@ -67,7 +67,7 @@ class GoUtilCli(object):
         # Subparser
         self.set_action_download_go()
         self.set_action_info()
-        self.set_action_score()
+        self.set_action_distance()
         self.set_action_tree()
         self.set_action_subpart()
 
@@ -196,19 +196,19 @@ class GoUtilCli(object):
         print term['id']
         golib.get_path(term, pred=term['id'], paths=[], verbose=True)
 
-    def set_action_score(self):
+    def set_action_distance(self):
         """ Set up the parser for the score action. """
-        go_parser = self.subparsers.add_parser('score',
-            help = 'Evaluate the score between GO terms',
-            description = 'For a given list of GO terms, a score '
-            'representing the distance between each terms will be '
+        go_parser = self.subparsers.add_parser('distance',
+            help = 'Return information on the distance between GO terms',
+            description = 'For a given list of GO terms, information '
+            'about the distance between each terms will be '
             'returned. The terms should be sperated by a comma ( , )')
         go_parser.add_argument('--ontology', default=None,
             help = 'Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.add_argument('--terms', default=None,
-            help = 'A comma ( , ) separated list of GO terms to score.')
+        go_parser.add_argument('terms', default=None,
+            help = 'A comma ( , ) separated list of GO terms.')
         go_parser.add_argument('--check-unique', default=False,
             action='store_true',
             help = 'Check for duplicate term while loading the ontology. '
@@ -218,11 +218,11 @@ class GoUtilCli(object):
             action='store_true',
             help='Add a root element to link the three main categories '
             'of the gene ontology.')
-        go_parser.set_defaults(command = self.action_score)
+        go_parser.set_defaults(command = self.action_distance)
 
-    def action_score(self):
-        """ Score how much apparts GO terms are. """
-        self.log.debug("Action: Score GO terms")
+    def action_distance(self):
+        """ Inform about how much apparts GO terms are. """
+        self.log.debug("Action: Distance between GO terms")
         ontology = self.args.ontology
         if not self.args.terms:
             print 'No GO terms specified'
@@ -239,8 +239,6 @@ class GoUtilCli(object):
             golib = PyGoLib(terms)
             terms = golib.fix_GO_graph()
 
-        #term = terms['GO:0008150']
-        #golib.get_path(term, pred=term['id'], paths=[], verbose=True)
         # Computes the scores
         gdc = GoDistanceCounter(terms)
         cnt = 0
@@ -253,8 +251,10 @@ class GoUtilCli(object):
                     scores = gdc.scores(term1, term2)
                     if scores:
                         self.log.info(
-                            "The score between %s and %s is: %s" % (term1,
-                            term2, scores))
+                            "The score between %s and %s is:\n" \
+                            " - %s branches to go from one to the other\n"\
+                            " - %s level appart" % (term1,
+                            term2, scores[0], scores[1]))
                     else:
                         self.log.info(
                             "The score between %s and %s could not be computed" % (

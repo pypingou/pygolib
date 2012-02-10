@@ -105,7 +105,8 @@ class GoDistanceCounter(object):
                         ancester = inter
                         deltalevel = deltaleveltmp
         if mindist != None and deltalevel != None:
-            return mindist + deltalevel / 10.0
+            #return mindist + deltalevel / 10.0
+            return (mindist, deltalevel)
         else:
             return None
 
@@ -128,7 +129,7 @@ class GoDistanceCounter(object):
                 start = el.index(goid1)
                 stop = el.index(goid2)
                 score = abs(stop - start)
-                score = score + score / 10.0
+                #score = score + score / 10.0
                 scores.append(score)
         if path2 is None:
             path2 = self.get_path(self.goterms[goid2])
@@ -138,7 +139,7 @@ class GoDistanceCounter(object):
                 start = el.index(goid1)
                 stop = el.index(goid2)
                 score = abs(stop - start)
-                score = score + score / 10.0
+                #score = score + score / 10.0
                 scores.append(score)
         return scores
 
@@ -158,12 +159,13 @@ class GoDistanceCounter(object):
         scores = self.__score_parents(goterm1['id'], goterm2['id'],
             path1, path2)
         if scores:
-            scores = min(scores)
+            score = min(scores)
             self.log.debug("%s and %s are parents" % (id1, id2))
+            return (score, score)
         else:
-            scores = self.__score_cousins(goterm1['id'], goterm2['id'],
+            score = self.__score_cousins(goterm1['id'], goterm2['id'],
                 path1, path2)
-        return scores
+            return score
 
 
 if __name__ == '__main__':
