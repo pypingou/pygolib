@@ -1,3 +1,10 @@
+# Ontology for the GO term GO:0043231 as presented in the article on
+# G-sesame from 2007:
+# James Z. Wang, Zhidian Du, Rapeeporn Payattakool, Philip S. Yu and
+# Chin-Fu Chen, A New Method to Measure the Semantic Similarity of GO
+# Terms, Bioinformatics, 2007, 23: 1274-1281;
+#
+
 [Term]
 id: 0005575
 name: Cellular component
