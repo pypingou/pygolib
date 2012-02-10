@@ -1,0 +1,12 @@
+test.png is the dot representation of the test.obo file
+test2.png is the dot representation of the test2.obo file
+  This file represents the ontology for the GO term GO:0043231 as presented
+  in the article:
+  James Z. Wang, Zhidian Du, Rapeeporn Payattakool, Philip S. Yu and
+  Chin-Fu Chen, A New Method to Measure the Semantic Similarity of GO
+  Terms, Bioinformatics, 2007, 23: 1274-1281;
+test3.png is the representation of the test3.obo file as provided by
+  the geneontology.org website on 2012-02-10.
+  It represents the ontology tree for the GO term GO:0043231
+
+All these ontology files are used in the unit-tests for test the algorithm.
