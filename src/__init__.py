@@ -70,7 +70,8 @@ class PyGoLib(object):
         tree.
         If verbose is True, it will print the line of the tree.
 
-        :arg termid, GO term identifier (GO:XXXX)
+        :arg termid, identifier of a GO term (ie: GO:0043229, or whatever
+            identifier is in your ontology).
         :arg level, the level in which we are while building the tree
         :arg pred, the precedant part of the paths browsed
         :arg paths, the list of paths already browsed
@@ -95,7 +96,7 @@ class PyGoLib(object):
                 pred=pred, paths=paths, verbose=verbose,
                 details=details)
 
-    def fix_GO_graph(self):
+    def fix_go_graph(self):
         """ Add a root node to the main three categories. This way we
         can always link different terms even if they are in separate
         branch.
@@ -122,9 +123,9 @@ class PyGoLib(object):
                 print term['id']
             pathways = self.get_path(term, pred=term['id'], paths=[],
                 verbose=verbose)
-            for el in pathways:
-                if termid in el:
-                    for tid in el.split(termid)[0].split(','):
+            for step in pathways:
+                if termid in step:
+                    for tid in step.split(termid)[0].split(','):
                         if tid:
                             term = self.graph[tid]
                             if term['id'] not in self.subgraph.keys():
@@ -139,8 +140,8 @@ class PyGoLib(object):
         if 'is_a' in term.keys():
             if isinstance(term['is_a'], list):
                 before = pred
-                for p in term['is_a']:
-                    self.__do_handle_parent(p, level, before, paths,
+                for parent in term['is_a']:
+                    self.__do_handle_parent(parent, level, before, paths,
                         verbose=verbose, details=details, rtype='is_a')
             else:
                 self.__do_handle_parent(term['is_a'], level, pred, paths,
@@ -148,8 +149,8 @@ class PyGoLib(object):
         if details and 'part_of' in term.keys():
             if isinstance(term['part_of'], list):
                 before = pred
-                for p in term['part_of']:
-                    self.__do_handle_parent(p, level, before, paths,
+                for parent in term['part_of']:
+                    self.__do_handle_parent(parent, level, before, paths,
                         verbose=verbose, details=details, rtype='part_of')
             else:
                 self.__do_handle_parent(term['part_of'], level, pred, paths,
@@ -172,7 +173,7 @@ def set_logger(quiet=False, debug=False):
         LOG.setLevel(logging.WARNING)
 
 
-def download_GO_graph(outputfile=None, force_dl=False):
+def download_go_graph(outputfile=None, force_dl=False):
     """ Retrieve the GO data from the specified file on the
     filesystem is provided or from the web or using the local
     version if dated from the day.
@@ -184,7 +185,7 @@ def download_GO_graph(outputfile=None, force_dl=False):
     annotation file from the geneontology.org website. Defaults to
     False.
     """
-    LOG.debug('download_GO_graph: outputfile %s - force_dl %s' %
+    LOG.debug('download_go_graph: outputfile %s - force_dl %s' %
         (outputfile, force_dl))
     if not outputfile:
         go_file = 'geneontology-%s.obo' % \

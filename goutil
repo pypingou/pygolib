@@ -45,13 +45,13 @@ import os
 import sys
 
 try:
-    from pygolib import get_logger, download_GO_graph, PyGoLib
+    from pygolib import get_logger, download_go_graph, PyGoLib
     from pygolib import __version__, set_logger
     from pygolib.godistance import GoDistanceCounter
     from pygolib.gsesame import GsesameGO, GsesameGene
     from pygolib.oboio import OboIO
 except ImportError:
-    from src import get_logger, download_GO_graph, PyGoLib
+    from src import get_logger, download_go_graph, PyGoLib
     from src import __version__, set_logger
     from src.godistance import GoDistanceCounter
     from src.gsesame import GsesameGO, GsesameGene
@@ -99,7 +99,7 @@ class GoUtilCli(object):
             print 'No GO terms specified'
             return 1
         if not ontology:
-            ontology = download_GO_graph()
+            ontology = download_go_graph()
         # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology,
@@ -108,7 +108,7 @@ class GoUtilCli(object):
         # Add a common root element if desired
         if self.args.add_root:
             golib = PyGoLib(terms)
-            terms = golib.fix_GO_graph()
+            terms = golib.fix_go_graph()
 
         # Computes the scores
         gdc = GoDistanceCounter(terms)
@@ -135,7 +135,7 @@ class GoUtilCli(object):
     def action_download_go(self):
         """ Download the latest GO term. """
         self.log.debug("Action: Download GO terms")
-        download_GO_graph(outputfile=self.args.output,
+        download_go_graph(outputfile=self.args.output,
             force_dl=self.args.force_dl)
 
     def action_gs_genedistance(self):
@@ -150,7 +150,7 @@ class GoUtilCli(object):
             print 'No GO terms specified for the second gene'
             return 1
         if not ontology:
-            ontology = download_GO_graph()
+            ontology = download_go_graph()
         # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology,
@@ -159,7 +159,7 @@ class GoUtilCli(object):
         # Add a common root element if desired
         if self.args.add_root:
             golib = PyGoLib(terms)
-            terms = golib.fix_GO_graph()
+            terms = golib.fix_go_graph()
 
         # Computes the scores
         gsgo = GsesameGene(terms)
@@ -184,7 +184,7 @@ class GoUtilCli(object):
             print 'No GO terms specified'
             return 1
         if not ontology:
-            ontology = download_GO_graph()
+            ontology = download_go_graph()
         # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology,
@@ -193,7 +193,7 @@ class GoUtilCli(object):
         # Add a common root element if desired
         if self.args.add_root:
             golib = PyGoLib(terms)
-            terms = golib.fix_GO_graph()
+            terms = golib.fix_go_graph()
 
         # Computes the scores
         gsgo = GsesameGO(terms)
@@ -223,7 +223,7 @@ class GoUtilCli(object):
             print 'No GO term specified'
             return 1
         if not ontology:
-            ontology = download_GO_graph()
+            ontology = download_go_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology,
             check_unique=self.args.check_unique)
@@ -248,7 +248,7 @@ class GoUtilCli(object):
             print 'No GO term specified'
             return 3
         if not ontology:
-            ontology = download_GO_graph()
+            ontology = download_go_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology,
             check_unique=self.args.check_unique)
@@ -270,7 +270,7 @@ class GoUtilCli(object):
             print 'No GO term specified'
             return 1
         if not ontology:
-            ontology = download_GO_graph()
+            ontology = download_go_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology,
             check_unique=self.args.check_unique)

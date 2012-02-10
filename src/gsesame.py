@@ -133,7 +133,7 @@ class GsesameGO(object):
             identifier is in your ontology).
         """
         golib = PyGoLib(self.goterms)
-        #golib.fix_GO_graph()
+        #golib.fix_go_graph()
         goterm1 = self.goterms[id1]
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[],
             details=True)
@@ -203,10 +203,10 @@ class GsesameGene(object):
 
 if __name__ == '__main__':
     from oboio import OboIO
-    from src import download_GO_graph
+    from src import download_go_graph
 
     OBIO = OboIO()
-    ONTO = download_GO_graph()
+    ONTO = download_go_graph()
     TERMS = OBIO.get_graph(ONTO)
 
     # G-Sesame GO example
