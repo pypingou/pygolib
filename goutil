@@ -64,6 +64,8 @@ class GoUtilCli(object):
     def __init__(self):
         """ Constructor. """
         self.name = os.path.basename(sys.argv[0])
+        self.parser = argparse.ArgumentParser(prog="goutil",
+            version=__version__)
         self.setup_parser()
         self.subparsers = self.parser.add_subparsers(title = 'Command')
         # Subparser
@@ -84,8 +86,7 @@ class GoUtilCli(object):
 
     def setup_parser(self):
         """ Set the main arguments. """
-        self.parser = argparse.ArgumentParser(prog="goutil")
-        self.parser.add_argument('-v', '--verbose', action = 'store_true',
+        self.parser.add_argument('--verbose', action = 'store_true',
                     help = 'Run with verbose output')
         self.parser.add_argument('-q', '--quiet', action = 'store_true',
                     help = 'Run quietly and only print out errors')
@@ -162,7 +163,6 @@ class GoUtilCli(object):
 
         # Computes the scores
         gsgo = GsesameGene(terms)
-        cnt = 0
         gene1_go_terms = self.args.gene1_goterms.split(',')
         gene2_go_terms = self.args.gene2_goterms.split(',')
         score = gsgo.scores(gene1_go_terms, gene2_go_terms)
@@ -227,7 +227,6 @@ class GoUtilCli(object):
         obio = OboIO()
         terms = obio.get_graph(ontology,
             check_unique=self.args.check_unique)
-        golib = PyGoLib(terms)
         try:
             term = terms[self.args.term]
         except KeyError:
@@ -445,5 +444,5 @@ class GoUtilCli(object):
 
 
 if __name__ == '__main__':
-    cli = GoUtilCli()
-    cli.args.command()
+    CLI = GoUtilCli()
+    CLI.args.command()
