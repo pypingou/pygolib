@@ -8,5 +8,9 @@ test2.png is the dot representation of the test2.obo file
 test3.png is the representation of the test3.obo file as provided by
   the geneontology.org website on 2012-02-10.
   It represents the ontology tree for the GO term GO:0043231
+test3_annotated.png is the same picture than test3.png but we added the
+  semantic value for each parent with regards to GO:0043231.
+  This can be used to do the calculation by hand and check the results
+  of the program
 
 All these ontology files are used in the unit-tests for test the algorithm.
