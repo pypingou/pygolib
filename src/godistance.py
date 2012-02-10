@@ -49,6 +49,17 @@ except ImportError:
     from src import get_logger, PyGoLib
 
 
+def _get_ancester(path1, path2):
+    """ For two given path, return the first common ancester.
+    :arg path1, a list of nodes.
+    :arg path2, a list of nodes.
+    """
+    for element in path1:
+        if element in path2:
+            return element
+    return None
+
+
 class GoDistanceCounter(object):
     """ This class is the main class of the project to compute the
     distance between two GO terms.
@@ -62,31 +73,24 @@ class GoDistanceCounter(object):
         if self.goterms is None:
             self.goterms = {}
         self.log = get_logger()
-
-    def __get_ancester(self, path1, path2):
-        """ For two given path, return the first common ancester.
-        :arg path1, a list of nodes.
-        :arg path2, a list of nodes.
-        """
-        for el in path1:
-            if el in path2:
-                return el
-        return None
+        self.pygo = PyGoLib(self.goterms)
 
     def __score_cousins(self, goid1, goid2, path1=None, path2=None):
         """ For two given GO term ID and the list of their path, return
         the score between them.
-        :arg goid1, GO term ID (ie: GO:XXXX).
-        :arg goid2, GO term ID (ie: GO:XXXX).
+        :arg goid1, GO term ID (ie: GO:0043231, or whatever identifier is
+            in your ontology).
+        :arg goid2, GO term ID (ie: GO:0043229, or whatever identifier is
+            in your ontology).
         :kwarg path1, the list path from the first GO term to the top of
         the tree, as returned by get_path().
         :kwarg path2, the list path from the second GO term to the top
         of the tree, as returned by get_path().
         """
         if path1 is None:
-            path1 = self.get_path(self.goterms[goid1])
+            path1 = self.pygo.get_path(self.goterms[goid1])
         if path2 is None:
-            path2 = self.get_path(self.goterms[goid2])
+            path2 = self.pygo.get_path(self.goterms[goid2])
 
         mindist = None
         deltalevel = None
@@ -94,7 +98,7 @@ class GoDistanceCounter(object):
             step1 = path.split(',')
             for opath in path2:
                 step2 = opath.split(',')
-                inter = self.__get_ancester(step1, step2)
+                inter = _get_ancester(step1, step2)
                 if inter:
                     index1 = step1.index(inter)
                     index2 = step2.index(inter)
@@ -102,10 +106,8 @@ class GoDistanceCounter(object):
                     deltaleveltmp = abs(index1 - index2)
                     if not mindist or dist < mindist:
                         mindist = dist
-                        ancester = inter
                         deltalevel = deltaleveltmp
         if mindist != None and deltalevel != None:
-            #return mindist + deltalevel / 10.0
             return (mindist, deltalevel)
         else:
             return None
@@ -113,40 +115,42 @@ class GoDistanceCounter(object):
     def __score_parents(self, goid1, goid2, path1=None, path2=None):
         """ For two given GO term ID and the list of their path, return
         the score between them if one is parent of the other.
-        :arg goid1, GO term ID (ie: GO:XXXX).
-        :arg goid2, GO term ID (ie: GO:XXXX).
+        :arg goid1, GO term ID (ie: GO:0043231, or whatever identifier is
+            in your ontology).
+        :arg goid2, GO term ID (ie: GO:0043229, or whatever identifier is
+            in your ontology).
         :kwarg path1, the list path from the first GO term to the top of
         the tree, as returned by get_path().
         :kwarg path2, the list path from the second GO term to the top
         of the tree, as returned by get_path().
         """
         if path1 is None:
-            path1 = self.get_path(self.goterms[goid1])
+            path1 = self.pygo.get_path(self.goterms[goid1])
         scores = []
         for paths in path1:
-            el = paths.split(',')
-            if goid2 in el:
-                start = el.index(goid1)
-                stop = el.index(goid2)
+            steps = paths.split(',')
+            if goid2 in steps:
+                start = steps.index(goid1)
+                stop = steps.index(goid2)
                 score = abs(stop - start)
-                #score = score + score / 10.0
                 scores.append(score)
         if path2 is None:
-            path2 = self.get_path(self.goterms[goid2])
+            path2 = self.pygo.get_path(self.goterms[goid2])
         for paths in path2:
-            el = paths.split(',')
-            if goid1 in el:
-                start = el.index(goid1)
-                stop = el.index(goid2)
+            steps = paths.split(',')
+            if goid1 in steps:
+                start = steps.index(goid1)
+                stop = steps.index(goid2)
                 score = abs(stop - start)
-                #score = score + score / 10.0
                 scores.append(score)
         return scores
 
     def scores(self, id1, id2):
         """Returns the score between two given GO terms.
-        :arg id1, identifier of a GO term (ie: GO:XXX).
-        :arg id2, identifier of a GO term (ie: GO:XXX).
+        :arg id1, identifier of a GO term (ie: GO:0043231, or whatever
+            identifier is in your ontology).
+        :arg id2, identifier of a GO term (ie: GO:0043229, or whatever
+            identifier is in your ontology).
         """
         golib = PyGoLib(self.goterms)
         goterm1 = self.goterms[id1]
@@ -170,12 +174,12 @@ class GoDistanceCounter(object):
 
 if __name__ == '__main__':
     from oboio import OboIO
-    gdc = GoDistanceCounter()
-    go_file = '../tests/test.obo'
+    GDC = GoDistanceCounter()
+    GOFILE = '../tests/test.obo'
 
-    obio = OboIO()
-    terms = obio.get_graph(go_file)
-    gdc = GoDistanceCounter(terms)
+    OBIO = OboIO()
+    TERMS = OBIO.get_graph(GOFILE)
+    GDC = GoDistanceCounter(TERMS)
     #gdc.get_biological_process()
     #print "%s terms found in the biological process branch" % \
         #len(self.biological_process.keys())
