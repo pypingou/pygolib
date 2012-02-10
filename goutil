@@ -48,11 +48,13 @@ try:
     from pygolib import get_logger, download_GO_graph, PyGoLib
     from pygolib import __version__, set_logger
     from pygolib.godistance import GoDistanceCounter
+    from pygolib.gsesame import GsesameGO, GsesameGene
     from pygolib.oboio import OboIO
 except ImportError:
     from src import get_logger, download_GO_graph, PyGoLib
     from src import __version__, set_logger
     from src.godistance import GoDistanceCounter
+    from src.gsesame import GsesameGO, GsesameGene
     from src.oboio import OboIO
 
 
@@ -67,7 +69,8 @@ class GoUtilCli(object):
         # Subparser
         self.set_action_distance()
         self.set_action_download_go()
-        self.set_action_gsesame_go()
+        self.set_action_gs_genedistance()
+        self.set_action_gs_godistance()
         self.set_action_info()
         self.set_action_tree()
         self.set_action_subpart()
@@ -133,6 +136,84 @@ class GoUtilCli(object):
         self.log.debug("Action: Download GO terms")
         download_GO_graph(outputfile=self.args.output,
             force_dl=self.args.force_dl)
+
+    def action_gs_genedistance(self):
+        """ Returns the semantic distance between genes based on their
+        GO terms. """
+        self.log.debug("Action: G-Sesame semantic distance between genes")
+        ontology = self.args.ontology
+        if not self.args.gene1_goterms:
+            print 'No GO terms specified for the first gene'
+            return 1
+        if not self.args.gene2_goterms:
+            print 'No GO terms specified for the second gene'
+            return 1
+        if not ontology:
+            ontology = download_GO_graph()
+        # Load graph
+        obio = OboIO()
+        terms = obio.get_graph(ontology,
+            check_unique=self.args.check_unique)
+
+        # Add a common root element if desired
+        if self.args.add_root:
+            golib = PyGoLib(terms)
+            terms = golib.fix_GO_graph()
+
+        # Computes the scores
+        gsgo = GsesameGene(terms)
+        cnt = 0
+        gene1_go_terms = self.args.gene1_goterms.split(',')
+        gene2_go_terms = self.args.gene2_goterms.split(',')
+        score = gsgo.scores(gene1_go_terms, gene2_go_terms)
+        if score:
+            self.log.info(
+                'The score between the two genes based on their GO terms'
+                ' is: %s' % (score))
+        else:
+            self.log.info(
+                'The score between the two genes could not be computed '
+                'using the go terms %s and %s' % (
+                gene1_go_terms, gene2_go_terms))
+
+    def action_gs_godistance(self):
+        """ Returns the semantic distance between GO terms. """
+        self.log.debug("Action: G-Sesame semantic distance between GO terms")
+        ontology = self.args.ontology
+        if not self.args.terms:
+            print 'No GO terms specified'
+            return 1
+        if not ontology:
+            ontology = download_GO_graph()
+        # Load graph
+        obio = OboIO()
+        terms = obio.get_graph(ontology,
+            check_unique=self.args.check_unique)
+
+        # Add a common root element if desired
+        if self.args.add_root:
+            golib = PyGoLib(terms)
+            terms = golib.fix_GO_graph()
+
+        # Computes the scores
+        gsgo = GsesameGO(terms)
+        cnt = 0
+        terms = self.args.terms.split(',')
+        for term1 in terms:
+            term1 = term1.strip()
+            for term2 in terms[cnt + 1:]:
+                term2 = term2.strip()
+                if term2:
+                    scores = gsgo.scores(term1, term2)
+                    if scores:
+                        self.log.info(
+                            'The score between %s and %s is:%s' % (term1,
+                            term2, scores))
+                    else:
+                        self.log.info(
+                            'The score between %s and %s could not be computed' % (
+                            term1, term2))
+            cnt = cnt + 1
 
     def action_info(self):
         """ Show the information known about a GO term. """
@@ -245,6 +326,65 @@ class GoUtilCli(object):
             'already a file with the same name in the current directory '
             'in which case the file will be overwriten.')
         go_parser.set_defaults(command = self.action_download_go)
+
+    def set_action_gs_genedistance(self):
+        """ Set up the parser for the gs_genedistance action. """
+        go_parser = self.subparsers.add_parser('gs_genedistance',
+            help = 'Calculate the semantic distance between genes using '
+                'the G-Sesame algorithm',
+            description = 'This method calculates the semantic distance '
+            'between two genes through their GO terms using the G-Sesame '
+            'algorithm as published in James Z. Wang, Zhidian Du, Rapeeporn '
+            'Payattakool, Philip S. Yu and Chin-Fu Chen, A New Method to '
+            'Measure the Semantic Similarity of GO Terms, Bioinformatics, '
+            '2007, 23: 1274-1281;')
+        go_parser.add_argument('gene1_goterms', default=None,
+            help = 'A comma ( , ) separated list of GO terms associated '
+            'with the first gene.')
+        go_parser.add_argument('gene2_goterms', default=None,
+            help = 'A comma ( , ) separated list of GO terms associated '
+            'with the second gene.')
+        go_parser.add_argument('--check-unique', default=False,
+            action='store_true',
+            help = 'Check for duplicate term while loading the ontology. '
+            'This will greatly increase the loading time but will warn '
+            'you if an identifier is double.')
+        go_parser.add_argument('--ontology', default=None,
+            help = 'Name of the ontology file to use. If none is '
+            'precised, it will download the one from geneontology '
+            'directly and use that one.')
+        go_parser.add_argument('--add-root', default=False,
+            action='store_true',
+            help='Add a root element to link the three main categories '
+            'of the gene ontology.')
+        go_parser.set_defaults(command = self.action_gs_genedistance)
+
+    def set_action_gs_godistance(self):
+        """ Set up the parser for the gs_godistance action. """
+        go_parser = self.subparsers.add_parser('gs_godistance',
+            help = 'Calculate the semantic distance of GO terms using the G-Sesame algorithm',
+            description = 'This method calculates the semantic distance '
+            'between two GO terms using the G-Sesame algorithm as '
+            'published in James Z. Wang, Zhidian Du, Rapeeporn Payattakool,'
+            ' Philip S. Yu and Chin-Fu Chen, A New Method to Measure the'
+            ' Semantic Similarity of GO Terms, Bioinformatics, 2007, 23: '
+            '1274-1281;')
+        go_parser.add_argument('terms', default=None,
+            help = 'A comma ( , ) separated list of GO terms.')
+        go_parser.add_argument('--check-unique', default=False,
+            action='store_true',
+            help = 'Check for duplicate term while loading the ontology. '
+            'This will greatly increase the loading time but will warn '
+            'you if an identifier is double.')
+        go_parser.add_argument('--ontology', default=None,
+            help = 'Name of the ontology file to use. If none is '
+            'precised, it will download the one from geneontology '
+            'directly and use that one.')
+        go_parser.add_argument('--add-root', default=False,
+            action='store_true',
+            help='Add a root element to link the three main categories '
+            'of the gene ontology.')
+        go_parser.set_defaults(command = self.action_gs_godistance)
 
     def set_action_info(self):
         """ Set up the parser for the downloadgo action. """
