@@ -48,6 +48,26 @@ except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
     from src import get_logger, PyGoLib
 
+def _get_ancester(path1, path2):
+    """ For two given path, return the first common ancester.
+    :arg path1, a list of nodes.
+    :arg path2, a list of nodes.
+    """
+    for step in path1:
+        if step in path2:
+            return step
+    return None
+
+def _get_all_ancesters(path):
+    """ For a given path, return all the ancesters in it. """
+    ancesters = []
+    for step in path:
+        for item in step.split(','):
+            if item not in ['is_a', 'part_of'] \
+                and item not in ancesters:
+                ancesters.append(item)
+    return ancesters
+
 
 class GsesameGO(object):
     """ This class re-implement in python the algorithm used in the
@@ -63,100 +83,13 @@ class GsesameGO(object):
         if self.goterms is None:
             self.goterms = {}
         self.log = get_logger()
-
-    def __get_all_ancesters(self, path):
-        """ For a given path, return all the ancesters in it. """
-        ancesters = []
-        for el in path:
-            for item in el.split(','):
-                if item not in ['is_a', 'part_of'] \
-                    and item not in ancesters:
-                    ancesters.append(item)
-        return ancesters
-
-    def __get_ancester(self, path1, path2):
-        """ For two given path, return the first common ancester.
-        :arg path1, a list of nodes.
-        :arg path2, a list of nodes.
-        """
-        for el in path1:
-            if el in path2:
-                return el
-        return None
-
-    def __score_cousins(self, goid1, goid2, path1=None, path2=None):
-        """ For two given GO term ID and the list of their path, return
-        the score between them.
-        :arg goid1, GO term ID (ie: GO:XXXX).
-        :arg goid2, GO term ID (ie: GO:XXXX).
-        :kwarg path1, the list path from the first GO term to the top of
-        the tree, as returned by get_path().
-        :kwarg path2, the list path from the second GO term to the top
-        of the tree, as returned by get_path().
-        """
-        if path1 is None:
-            path1 = self.get_path(self.goterms[goid1])
-        if path2 is None:
-            path2 = self.get_path(self.goterms[goid2])
-
-        mindist = None
-        deltalevel = None
-        for path in path1:
-            step1 = path.split(',')
-            for opath in path2:
-                step2 = opath.split(',')
-                inter = self.__get_ancester(step1, step2)
-                if inter:
-                    index1 = step1.index(inter)
-                    index2 = step2.index(inter)
-                    dist = index1 + index2
-                    deltaleveltmp = abs(index1 - index2)
-                    if not mindist or dist < mindist:
-                        mindist = dist
-                        ancester = inter
-                        deltalevel = deltaleveltmp
-        if mindist != None and deltalevel != None:
-            return mindist + deltalevel / 10.0
-        else:
-            return None
-
-    def __score_parents(self, goid1, goid2, path1=None, path2=None):
-        """ For two given GO term ID and the list of their path, return
-        the score between them if one is parent of the other.
-        :arg goid1, GO term ID (ie: GO:XXXX).
-        :arg goid2, GO term ID (ie: GO:XXXX).
-        :kwarg path1, the list path from the first GO term to the top of
-        the tree, as returned by get_path().
-        :kwarg path2, the list path from the second GO term to the top
-        of the tree, as returned by get_path().
-        """
-        if path1 is None:
-            path1 = self.get_path(self.goterms[goid1])
-        scores = []
-        for paths in path1:
-            el = paths.split(',')
-            if goid2 in el:
-                start = el.index(goid1)
-                stop = el.index(goid2)
-                score = abs(stop - start)
-                score = score + score / 10.0
-                scores.append(score)
-        if path2 is None:
-            path2 = self.get_path(self.goterms[goid2])
-        for paths in path2:
-            el = paths.split(',')
-            if goid1 in el:
-                start = el.index(goid1)
-                stop = el.index(goid2)
-                score = abs(stop - start)
-                score = score + score / 10.0
-                scores.append(score)
-        return scores
+        self.pygo = PyGoLib(self.goterms)
 
     def semantic_value(self, id1):
         """ Returns the semantic values of all the parents of a given
         term.
-        :arg id1, identifier of a GO term (ie: GO:XXX).
+        :arg id1, identifier of a GO term (ie: GO:0043231, or whatever
+            identifier is in your ontology).
         """
         sem_values = self.semantic_values(id1)
         return sum(sem_values.values())
@@ -164,15 +97,16 @@ class GsesameGO(object):
     def semantic_values(self, id1):
         """ Returns the semantic values of all the parents of a given
         term.
-        :arg id1, identifier of a GO term (ie: GO:XXX).
+        :arg id1, identifier of a GO term (ie: GO:0043231, or whatever
+            identifier is in your ontology).
         """
         golib = PyGoLib(self.goterms)
         goterm1 = self.goterms[id1]
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[],
             details=True)
 
-        semantic_values= {}
-        for ancester in self.__get_all_ancesters(path1):
+        semantic_values = {}
+        for ancester in _get_all_ancesters(path1):
             if ancester == goterm1['id']:
                 semantic_values[ancester] = 1
                 continue
@@ -182,10 +116,10 @@ class GsesameGO(object):
                 if ancester in item:
                     path_el = item.split(',')
                     ind = path_el.index(ancester)
-                    for el in range(ind -1, 0, -2):
-                        if path_el[el] == 'is_a':
+                    for step in range(ind -1, 0, -2):
+                        if path_el[step] == 'is_a':
                             tmp_cnt = tmp_cnt * 0.8
-                        elif path_el[el] == 'part_of':
+                        elif path_el[step] == 'part_of':
                             tmp_cnt = tmp_cnt * 0.6
                     tmp_score.append(tmp_cnt)
             semantic_values[ancester] = max(tmp_score)
@@ -193,8 +127,10 @@ class GsesameGO(object):
 
     def scores(self, id1, id2):
         """Returns the score between two given GO terms.
-        :arg id1, identifier of a GO term (ie: GO:XXX).
-        :arg id2, identifier of a GO term (ie: GO:XXX).
+        :arg id1, identifier of a GO term (ie: GO:0043231, or whatever
+            identifier is in your ontology).
+        :arg id2, identifier of a GO term (ie: GO:0043229, or whatever
+            identifier is in your ontology).
         """
         golib = PyGoLib(self.goterms)
         #golib.fix_GO_graph()
@@ -202,14 +138,14 @@ class GsesameGO(object):
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[],
             details=True)
         #print goterm1['id'], len(path1)
-        ancester1 = self.__get_all_ancesters(path1)
+        ancester1 = _get_all_ancesters(path1)
         semantic_values1 = self.semantic_values(goterm1['id'])
 
         goterm2 = self.goterms[id2]
         path2 = golib.get_path(goterm2, pred=goterm2['id'], paths=[],
             details=True)
         #print goterm2['id'], len(path2)
-        ancester2 = self.__get_all_ancesters(path2)
+        ancester2 = _get_all_ancesters(path2)
         semantic_values2 = self.semantic_values(goterm2['id'])
         
         common_ancester = list(set(ancester1).intersection(set(ancester2)))
@@ -240,13 +176,14 @@ class GsesameGene(object):
     def __get_go_score(self, goid, golist):
         """ For a given GO term return the semantic similarity between
         this GO term and the given GO list.
-        :arg goid, GO term identifier (ie: GO:XXXXX)
+        :arg goid, identifier of a GO term (ie: GO:0043229, or whatever
+            identifier is in your ontology).
         :arg golist, list of GO terms
         """
         scores = []
         sesamego = GsesameGO(self.goterms)
-        for go in golist:
-            scores.append(sesamego.scores(goid, go))
+        for goterm in golist:
+            scores.append(sesamego.scores(goid, goterm))
         return max(scores)
 
     def scores(self, gene1, gene2):
@@ -256,35 +193,34 @@ class GsesameGene(object):
         :arg gene2, list of GO term associated with the gene2
         """
         sim1 = 0
-        for go in gene1:
-            sim1 = sim1 + self.__get_go_score(go, gene2)
+        for goterm in gene1:
+            sim1 = sim1 + self.__get_go_score(goterm, gene2)
         sim2 = 0
-        for go in gene2:
-            sim2 = sim2 + self.__get_go_score(go, gene1)
+        for goterm in gene2:
+            sim2 = sim2 + self.__get_go_score(goterm, gene1)
         score = (sim1 + sim2) / (len(gene1) + len(gene2))
         return score
 
 if __name__ == '__main__':
     from oboio import OboIO
     from src import download_GO_graph
-    from src import get_logger, PyGoLib
 
-    obio = OboIO()
-    ontology = download_GO_graph()
-    terms = obio.get_graph(ontology)
+    OBIO = OboIO()
+    ONTO = download_GO_graph()
+    TERMS = OBIO.get_graph(ONTO)
 
     # G-Sesame GO example
-    gdc = GsesameGO(terms)
-    print 'GO:0043229 semantic value:', gdc.semantic_value('GO:0043229')
-    print 'GO:0043231 semantic value:', gdc.semantic_value('GO:0043231')
+    GSGO = GsesameGO(TERMS)
+    print 'GO:0043229 semantic value:', GSGO.semantic_value('GO:0043229')
+    print 'GO:0043231 semantic value:', GSGO.semantic_value('GO:0043231')
     print 'Score for: GO:0043229 - GO:0043231:', \
-        gdc.scores('GO:0043229','GO:0043231')
+        GSGO.scores('GO:0043229','GO:0043231')
 
     # G-Sesame Gene example
-    sesamegene = GsesameGene(terms)
-    gene1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
+    GSGENE = GsesameGene(TERMS)
+    GENE1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
         'GO:0008270', 'GO:0004023']
-    gene2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
+    GENE2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
         'GO:0020037']
     print 'Semantic similarities between the two genes:', \
-        sesamegene.scores(gene1, gene2)
+        GSGENE.scores(GENE1, GENE2)
