@@ -268,33 +268,23 @@ if __name__ == '__main__':
     from oboio import OboIO
     from src import download_GO_graph
     from src import get_logger, PyGoLib
-    #go_file = '../tests/test2.obo'
 
     obio = OboIO()
     ontology = download_GO_graph()
     terms = obio.get_graph(ontology)
-    gdc = GsesameGO(terms)
-    #print 'Score for: GO:0043229 - GO:0043231'
-    #print gdc.scores('GO:0043231','GO:0043229')
-    print 'Score for: GO:0005739 - GO:0005777'
-    print gdc.scores('GO:0005739','GO:0005777')
-    print 'GO:0005739', gdc.semantic_value('GO:0005739')
-    print 'GO:0005777', gdc.semantic_value('GO:0005777')
-    #sesamegene = GsesameGene(terms)
-    #gene1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
-        #'GO:0008270', 'GO:0004023']
-    #gene2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
-        #'GO:0020037']
-    #print 'Semantic similarities between the two genes:'
-    #print sesamegene.scores(gene1, gene2)
-    
-    #ontology = '../tests/test2.obo'
-    #obio = OboIO()
-    #terms = obio.get_graph(ontology)
-    #gdc = GsesameGO(terms)
-    #print 'Score for: GO:0043229 - GO:0043231'
-    #print gdc.scores('0043229','0043231')
-    #print gdc.semantic_value('0043231')
-    #print gdc.semantic_value('0043229')
 
-    
+    # G-Sesame GO example
+    gdc = GsesameGO(terms)
+    print 'GO:0043229 semantic value:', gdc.semantic_value('GO:0043229')
+    print 'GO:0043231 semantic value:', gdc.semantic_value('GO:0043231')
+    print 'Score for: GO:0043229 - GO:0043231:', \
+        gdc.scores('GO:0043229','GO:0043231')
+
+    # G-Sesame Gene example
+    sesamegene = GsesameGene(terms)
+    gene1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
+        'GO:0008270', 'GO:0004023']
+    gene2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
+        'GO:0020037']
+    print 'Semantic similarities between the two genes:', \
+        sesamegene.scores(gene1, gene2)
