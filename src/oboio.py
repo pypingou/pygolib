@@ -80,7 +80,8 @@ class OboIO (object):
                         if key == 'relationship':
                             if 'part_of' in value:
                                 key = 'part_of'
-                                value = value.split('part_of')[1].split('!')[0].strip()
+                                value = value.split('part_of')[1].split(
+                                    '!')[0].strip()
                         if key in info.keys():
                             if isinstance(info[key], str):
                                 info[key] = [info[key], value.strip()]
