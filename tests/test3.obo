@@ -1,3 +1,5 @@
+# Version of the ontology for the term GO:0043231 on 2012-02-10
+
 [Term]
 id: 0005575
 name: Cellular component
@@ -22,7 +24,7 @@ is_a: 0043229
 id: 0043229
 name: Intracellular organelle
 is_a: 0043226
-part_of: 0044424
+is_a: 0044424
 
 [Term]
 id: 0005622
@@ -31,7 +33,7 @@ is_a: 0044464
 
 [Term]
 id: 0044424
-name: Intracellylar part
+name: Intracellular part
 is_a: 0044464
 part_of: 0005622
 
@@ -45,3 +47,14 @@ part_of: 0005623
 id: 0005623
 name: Cell
 is_a: 0005575
+
+[Term]
+id: 0043227
+name: Membrane-bounded organelle
+is_a: 0043226
+
+[Term]
+id: 0043231
+name: Intracellular membrane-bounded organelle
+is_a: 0043227
+is_a: 0043229
