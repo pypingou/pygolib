@@ -58,12 +58,13 @@ class OboIO (object):
             self.graph = {}
         self.log = get_logger()
 
-    def get_graph(self, filename, check_unique=False):
+    def get_graph(self, filename, no_check_unique=True):
         """ From the OBO file, extract all the terms and store them in
         a graph.
         :arg filename, the name of the file to read.
-        :kwarg unique, a boolean to specify wether we should check that
-        IDs are unique in the ontology. Influences speed greatly.
+        :kwarg no_check_unique, a boolean to specify wether we should
+        check that IDs are unique in the ontology. Influences speed
+        greatly.
         """
         stream = open(filename)
         data = stream.read()
@@ -82,7 +83,7 @@ class OboIO (object):
                                 key = 'part_of'
                                 value = value.split('part_of')[1].split(
                                     '!')[0].strip()
-                        if key in info.keys():
+                        if key in info:
                             if isinstance(info[key], str):
                                 info[key] = [info[key], value.strip()]
                             elif isinstance(info[key], list):
@@ -90,9 +91,9 @@ class OboIO (object):
                         else:
                             info[key] = value.strip()
 
-                if check_unique and info['id'] not in self.graph.keys():
+                if no_check_unique:
                     self.graph[info['id']] = info
-                elif not check_unique:
+                elif info['id'] not in self.graph:
                     self.graph[info['id']] = info
                 else:
                     self.log.warning('%s is present several time in the ontology' %
@@ -101,9 +102,9 @@ class OboIO (object):
                 if 'alt_id' in info:
                     alt_ids = info['alt_id']
                     if isinstance(alt_ids, str):
-                        if check_unique and alt_ids not in self.graph.keys():
+                        if no_check_unique:
                             self.graph[alt_ids] = info
-                        elif not check_unique:
+                        elif alt_ids not in self.graph:
                             self.graph[alt_ids] = info
                         else:
                             self.log.warning(
@@ -111,15 +112,15 @@ class OboIO (object):
                             info['id'])
                     elif isinstance(alt_ids, list):
                         for ids in alt_ids:
-                            if check_unique and ids not in self.graph.keys():
+                            if no_check_unique:
                                 self.graph[ids] = info
-                            elif not check_unique:
+                            elif ids not in self.graph:
                                 self.graph[ids] = info
                             else:
                                 self.log.warning(
                                 '%s is present several time in the ontology' %
                                 info['id'])
-        self.log.info("%s GO terms retrieved" % len(self.graph.keys()))
+        self.log.info("%s GO terms retrieved" % len(self.graph))
         return self.graph
 
     def write_down_ontology(self, datafile):
@@ -128,11 +129,11 @@ class OboIO (object):
         """
         stream = open(datafile, 'w')
         cnt = 0
-        for key in self.graph.keys():
+        for key in self.graph:
             stream.write('\n[Term] \n')
             cnt = cnt + 1
             info = self.graph[key]
-            for infokey in info.keys():
+            for infokey in info:
                 if isinstance(info[infokey], list):
                     for entry in info[infokey]:
                         stream.write(infokey + ': ' + entry + '\n')

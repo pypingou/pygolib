@@ -103,7 +103,7 @@ class GoUtilCli(object):
         # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology,
-            check_unique=self.args.check_unique)
+            no_check_unique=self.args.no_check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -154,7 +154,7 @@ class GoUtilCli(object):
         # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology,
-            check_unique=self.args.check_unique)
+            no_check_unique=self.args.no_check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -188,7 +188,7 @@ class GoUtilCli(object):
         # Load graph
         obio = OboIO()
         terms = obio.get_graph(ontology,
-            check_unique=self.args.check_unique)
+            no_check_unique=self.args.no_check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -226,7 +226,7 @@ class GoUtilCli(object):
             ontology = download_go_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology,
-            check_unique=self.args.check_unique)
+            no_check_unique=self.args.no_check_unique)
         try:
             term = terms[self.args.term]
         except KeyError:
@@ -251,7 +251,7 @@ class GoUtilCli(object):
             ontology = download_go_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology,
-            check_unique=self.args.check_unique)
+            no_check_unique=self.args.no_check_unique)
         golib = PyGoLib(terms)
         subgraph = golib.get_sub_graph(terms, self.args.term)
         print "%s terms found in the subgraph" % \
@@ -273,7 +273,7 @@ class GoUtilCli(object):
             ontology = download_go_graph()
         obio = OboIO()
         terms = obio.get_graph(ontology,
-            check_unique=self.args.check_unique)
+            no_check_unique=self.args.no_check_unique)
         golib = PyGoLib(terms)
         try:
             term = terms[self.args.term]
@@ -297,11 +297,11 @@ class GoUtilCli(object):
             'directly and use that one.')
         go_parser.add_argument('terms', default=None,
             help = 'A comma ( , ) separated list of GO terms.')
-        go_parser.add_argument('--check-unique', default=False,
+        go_parser.add_argument('--no-check-unique', default=False,
             action='store_true',
-            help = 'Check for duplicate term while loading the ontology. '
-            'This will greatly increase the loading time but will warn '
-            'you if an identifier is double.')
+            help = 'Do not check for duplicate term while loading the '
+            'ontology. This will greatly increase the loading time but '
+            'will warn you if an identifier is double.')
         go_parser.add_argument('--add-root', default=False,
             action='store_true',
             help='Add a root element to link the three main categories '
