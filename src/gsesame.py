@@ -154,9 +154,10 @@ class GsesameGO(object):
             sum_comm_anc = sum_comm_anc + semantic_values2[ancester] + \
                 semantic_values1[ancester]
 
-        score = sum_comm_anc / (sum(semantic_values1.values()) 
+        score = sum_comm_anc / (sum(semantic_values1.values())
             + sum(semantic_values2.values()))
         return score
+
 
 class GsesameGene(object):
     """ This class re-implement in python the algorithm used in the
