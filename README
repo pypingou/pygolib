@@ -1,7 +1,8 @@
-GOutil
+pygolib
 ======
 
-This project provides a small utility to play with the Gene Ontology.
+This project provides a python library and a small utility to play with the
+Gene Ontology (and eventually any ontology provided in a OBO format).
 
 Using it you can:
 - download the latest GO annotation file.
