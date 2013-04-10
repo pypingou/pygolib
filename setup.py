@@ -17,4 +17,4 @@ setup(
     package_dir={'pygolib': 'src'},
     packages=['pygolib'],
     scripts=["goutil"],
-    )
+)
