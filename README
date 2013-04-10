@@ -8,4 +8,14 @@ Using it you can:
 - extract a sub-part of the ontology
    such as, all the term which are children of a given one
     IE: extract all the terms related with "biological process"
-- calculate the distance between two terms
+- calculate the distance between two terms using the algorithm from G-SESAME:
+  http://bioinformatics.clemson.edu/G-SESAME/
+- plot the tree of the ancestors of a term
+- return the information known about a term
+
+Example usage:
+
+ goutil subpart GO:0006950
+
+ goutil tree GO:0006950
+
