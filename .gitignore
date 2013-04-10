@@ -2,6 +2,7 @@
 .project
 .pydev*
 *.log
+*.swp
 build/
 dist/
 MANIFEST
