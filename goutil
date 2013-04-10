@@ -4,7 +4,7 @@
 """
 This project is licensed under the New BSD License:
 
-Copyright (c) 2012, Pierre-Yves Chibon
+Copyright (c) 2012-2013, Pierre-Yves Chibon
 
 All rights reserved.
 
@@ -65,9 +65,9 @@ class GoUtilCli(object):
         """ Constructor. """
         self.name = os.path.basename(sys.argv[0])
         self.parser = argparse.ArgumentParser(prog="goutil",
-            version=__version__)
+                                              version=__version__)
         self.setup_parser()
-        self.subparsers = self.parser.add_subparsers(title = 'Command')
+        self.subparsers = self.parser.add_subparsers(title='Command')
         # Subparser
         self.set_action_distance()
         self.set_action_download_go()
@@ -86,10 +86,10 @@ class GoUtilCli(object):
 
     def setup_parser(self):
         """ Set the main arguments. """
-        self.parser.add_argument('--verbose', action = 'store_true',
-                    help = 'Run with verbose output')
-        self.parser.add_argument('-q', '--quiet', action = 'store_true',
-                    help = 'Run quietly and only print out errors')
+        self.parser.add_argument('--verbose', action='store_true',
+                                 help='Run with verbose output')
+        self.parser.add_argument('-q', '--quiet', action='store_true',
+                                 help='Run quietly and only print out errors')
 
     def action_distance(self):
         """ Inform about how much apparts GO terms are. """
@@ -102,8 +102,8 @@ class GoUtilCli(object):
             ontology = download_go_graph()
         # Load graph
         obio = OboIO()
-        terms = obio.get_graph(ontology,
-            no_check_unique=self.args.no_check_unique)
+        terms = obio.get_graph(
+            ontology, no_check_unique=self.args.no_check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -122,13 +122,14 @@ class GoUtilCli(object):
                     scores = gdc.scores(term1, term2)
                     if scores:
                         self.log.info(
-                            "The score between %s and %s is:\n" \
-                            " - %s branches to go from one to the other\n"\
+                            "The score between %s and %s is:\n"
+                            " - %s branches to go from one to the other\n"
                             " - %s level appart" % (term1,
                             term2, scores[0], scores[1]))
                     else:
                         self.log.info(
-                            "The score between %s and %s could not be computed" % (
+                            "The score between %s and %s could "
+                            "not be computed" % (
                             term1, term2))
             cnt = cnt + 1
 
@@ -136,7 +137,7 @@ class GoUtilCli(object):
         """ Download the latest GO term. """
         self.log.debug("Action: Download GO terms")
         download_go_graph(outputfile=self.args.output,
-            force_dl=self.args.force_dl)
+                          force_dl=self.args.force_dl)
 
     def action_gs_genedistance(self):
         """ Returns the semantic distance between genes based on their
@@ -153,8 +154,8 @@ class GoUtilCli(object):
             ontology = download_go_graph()
         # Load graph
         obio = OboIO()
-        terms = obio.get_graph(ontology,
-            no_check_unique=self.args.no_check_unique)
+        terms = obio.get_graph(
+            ontology, no_check_unique=self.args.no_check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -187,8 +188,8 @@ class GoUtilCli(object):
             ontology = download_go_graph()
         # Load graph
         obio = OboIO()
-        terms = obio.get_graph(ontology,
-            no_check_unique=self.args.no_check_unique)
+        terms = obio.get_graph(
+            ontology, no_check_unique=self.args.no_check_unique)
 
         # Add a common root element if desired
         if self.args.add_root:
@@ -211,7 +212,8 @@ class GoUtilCli(object):
                             term2, scores))
                     else:
                         self.log.info(
-                            'The score between %s and %s could not be computed' % (
+                            'The score between %s and %s '
+                            'could not be computed' % (
                             term1, term2))
             cnt = cnt + 1
 
@@ -225,8 +227,8 @@ class GoUtilCli(object):
         if not ontology:
             ontology = download_go_graph()
         obio = OboIO()
-        terms = obio.get_graph(ontology,
-            no_check_unique=self.args.no_check_unique)
+        terms = obio.get_graph(
+            ontology, no_check_unique=self.args.no_check_unique)
         try:
             term = terms[self.args.term]
         except KeyError:
@@ -250,15 +252,15 @@ class GoUtilCli(object):
         if not ontology:
             ontology = download_go_graph()
         obio = OboIO()
-        terms = obio.get_graph(ontology,
-            no_check_unique=self.args.no_check_unique)
+        terms = obio.get_graph(
+            ontology, no_check_unique=self.args.no_check_unique)
         golib = PyGoLib(terms)
         subgraph = golib.get_sub_graph(terms, self.args.term)
         print "%s terms found in the subgraph" % \
             len(subgraph.keys())
         if subgraph.keys():
-            outputfile =  'subgraph-%s-%s.obo' % (self.args.term,
-                datetime.datetime.now().strftime('%Y%m%d'))
+            outputfile = 'subgraph-%s-%s.obo' % (
+                self.args.term, datetime.datetime.now().strftime('%Y%m%d'))
             obio.graph = subgraph
             obio.write_down_ontology(outputfile)
 
@@ -272,8 +274,8 @@ class GoUtilCli(object):
         if not ontology:
             ontology = download_go_graph()
         obio = OboIO()
-        terms = obio.get_graph(ontology,
-            no_check_unique=self.args.no_check_unique)
+        terms = obio.get_graph(
+            ontology, no_check_unique=self.args.no_check_unique)
         golib = PyGoLib(terms)
         try:
             term = terms[self.args.term]
@@ -286,161 +288,217 @@ class GoUtilCli(object):
 
     def set_action_distance(self):
         """ Set up the parser for the score action. """
-        go_parser = self.subparsers.add_parser('distance',
-            help = 'Return information on the distance between GO terms',
-            description = 'For a given list of GO terms, information '
+        go_parser = self.subparsers.add_parser(
+            'distance',
+            help='Return information on the distance between GO terms',
+            description='For a given list of GO terms, information '
             'about the distance between each terms will be '
             'returned. The terms should be sperated by a comma ( , )')
-        go_parser.add_argument('--ontology', default=None,
-            help = 'Name of the ontology file to use. If none is '
+        go_parser.add_argument(
+            '--ontology',
+            default=None,
+            help='Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.add_argument('terms', default=None,
-            help = 'A comma ( , ) separated list of GO terms.')
-        go_parser.add_argument('--no-check-unique', default=False,
+        go_parser.add_argument(
+            'terms',
+            default=None,
+            help='A comma ( , ) separated list of GO terms.')
+        go_parser.add_argument(
+            '--no-check-unique',
+            default=False,
             action='store_true',
-            help = 'Do not check for duplicate term while loading the '
+            help='Do not check for duplicate term while loading the '
             'ontology. This will greatly increase the loading time but '
             'will warn you if an identifier is double.')
-        go_parser.add_argument('--add-root', default=False,
+        go_parser.add_argument(
+            '--add-root',
+            default=False,
             action='store_true',
             help='Add a root element to link the three main categories '
             'of the gene ontology.')
-        go_parser.set_defaults(command = self.action_distance)
+        go_parser.set_defaults(command=self.action_distance)
 
     def set_action_download_go(self):
         """ Set up the parser for the downloadgo action. """
-        go_parser = self.subparsers.add_parser('downloadgo',
-            help = 'Download the latest Gene Ontology',
-            description = 'This command will download in the current '
+        go_parser = self.subparsers.add_parser(
+            'downloadgo',
+            help='Download the latest Gene Ontology',
+            description='This command will download in the current '
             'directory the latest version of the gene ontology as you '
             'can find it on the geneontology.org website.')
-        go_parser.add_argument('--output', default=None,
-            help = 'Precise the name of the output file in which the'
+        go_parser.add_argument(
+            '--output',
+            default=None,
+            help='Precise the name of the output file in which the'
             'gene ontology will be stored. If not provided the file'
             'will be looking like: geneontology-DATE.obo.')
-        go_parser.add_argument('--force-dl', default=False,
+        go_parser.add_argument(
+            '--force-dl',
+            default=False,
             action='store_true',
-            help = 'Force the download of the ontology even if there is '
+            help='Force the download of the ontology even if there is '
             'already a file with the same name in the current directory '
             'in which case the file will be overwriten.')
-        go_parser.set_defaults(command = self.action_download_go)
+        go_parser.set_defaults(command=self.action_download_go)
 
     def set_action_gs_genedistance(self):
         """ Set up the parser for the gs_genedistance action. """
-        go_parser = self.subparsers.add_parser('gs_genedistance',
-            help = 'Calculate the semantic distance between genes using '
-                'the G-Sesame algorithm',
-            description = 'This method calculates the semantic distance '
+        go_parser = self.subparsers.add_parser(
+            'gs_genedistance',
+            help='Calculate the semantic distance between genes using '
+            'the G-Sesame algorithm',
+            description='This method calculates the semantic distance '
             'between two genes through their GO terms using the G-Sesame '
             'algorithm as published in James Z. Wang, Zhidian Du, Rapeeporn '
             'Payattakool, Philip S. Yu and Chin-Fu Chen, A New Method to '
             'Measure the Semantic Similarity of GO Terms, Bioinformatics, '
             '2007, 23: 1274-1281;')
-        go_parser.add_argument('gene1_goterms', default=None,
-            help = 'A comma ( , ) separated list of GO terms associated '
+        go_parser.add_argument(
+            'gene1_goterms',
+            default=None,
+            help='A comma ( , ) separated list of GO terms associated '
             'with the first gene.')
-        go_parser.add_argument('gene2_goterms', default=None,
-            help = 'A comma ( , ) separated list of GO terms associated '
+        go_parser.add_argument(
+            'gene2_goterms',
+            default=None,
+            help='A comma ( , ) separated list of GO terms associated '
             'with the second gene.')
-        go_parser.add_argument('--check-unique', default=False,
+        go_parser.add_argument(
+            '--check-unique',
+            default=False,
             action='store_true',
-            help = 'Check for duplicate term while loading the ontology. '
+            help='Check for duplicate term while loading the ontology. '
             'This will greatly increase the loading time but will warn '
             'you if an identifier is double.')
-        go_parser.add_argument('--ontology', default=None,
-            help = 'Name of the ontology file to use. If none is '
+        go_parser.add_argument(
+            '--ontology',
+            default=None,
+            help='Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.add_argument('--add-root', default=False,
+        go_parser.add_argument(
+            '--add-root',
+            default=False,
             action='store_true',
             help='Add a root element to link the three main categories '
             'of the gene ontology.')
-        go_parser.set_defaults(command = self.action_gs_genedistance)
+        go_parser.set_defaults(command=self.action_gs_genedistance)
 
     def set_action_gs_godistance(self):
         """ Set up the parser for the gs_godistance action. """
-        go_parser = self.subparsers.add_parser('gs_godistance',
-            help = 'Calculate the semantic distance of GO terms using the G-Sesame algorithm',
-            description = 'This method calculates the semantic distance '
+        go_parser = self.subparsers.add_parser(
+            'gs_godistance',
+            help='Calculate the semantic distance of GO terms using the '
+            'G-Sesame algorithm',
+            description='This method calculates the semantic distance '
             'between two GO terms using the G-Sesame algorithm as '
             'published in James Z. Wang, Zhidian Du, Rapeeporn Payattakool,'
             ' Philip S. Yu and Chin-Fu Chen, A New Method to Measure the'
             ' Semantic Similarity of GO Terms, Bioinformatics, 2007, 23: '
             '1274-1281;')
-        go_parser.add_argument('terms', default=None,
-            help = 'A comma ( , ) separated list of GO terms.')
-        go_parser.add_argument('--check-unique', default=False,
+        go_parser.add_argument(
+            'terms',
+            default=None,
+            help='A comma ( , ) separated list of GO terms.')
+        go_parser.add_argument(
+            '--check-unique',
+            default=False,
             action='store_true',
-            help = 'Check for duplicate term while loading the ontology. '
+            help='Check for duplicate term while loading the ontology. '
             'This will greatly increase the loading time but will warn '
             'you if an identifier is double.')
-        go_parser.add_argument('--ontology', default=None,
-            help = 'Name of the ontology file to use. If none is '
+        go_parser.add_argument(
+            '--ontology',
+            default=None,
+            help='Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.add_argument('--add-root', default=False,
+        go_parser.add_argument(
+            '--add-root',
+            default=False,
             action='store_true',
             help='Add a root element to link the three main categories '
             'of the gene ontology.')
-        go_parser.set_defaults(command = self.action_gs_godistance)
+        go_parser.set_defaults(command=self.action_gs_godistance)
 
     def set_action_info(self):
         """ Set up the parser for the downloadgo action. """
-        go_parser = self.subparsers.add_parser('info',
-            help = 'Return all information known about a given GO terms',
-            description = 'This command will return all the information '
+        go_parser = self.subparsers.add_parser(
+            'info',
+            help='Return all information known about a given GO terms',
+            description='This command will return all the information '
             'known about a given GO term in the provided ontology.')
-        go_parser.add_argument('term', default=None,
-            help = 'The GO term for which to print the information.')
-        go_parser.add_argument('--check-unique', default=False,
+        go_parser.add_argument(
+            'term',
+            default=None,
+            help='The GO term for which to print the information.')
+        go_parser.add_argument(
+            '--check-unique',
+            default=False,
             action='store_true',
-            help = 'Check for duplicate term while loading the ontology. '
+            help='Check for duplicate term while loading the ontology. '
             'This will greatly increase the loading time but will warn '
             'you if an identifier is double.')
-        go_parser.add_argument('--ontology', default=None,
-            help = 'Name of the ontology file to use. If none is '
+        go_parser.add_argument(
+            '--ontology',
+            default=None,
+            help='Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.set_defaults(command = self.action_info)
+        go_parser.set_defaults(command=self.action_info)
 
     def set_action_subpart(self):
         """ Set up the parser for the subpart action. """
-        go_parser = self.subparsers.add_parser('subpart',
-            help = 'Extract a subpart of the GO graph',
-            description = 'This method will extract all the children '
+        go_parser = self.subparsers.add_parser(
+            'subpart',
+            help='Extract a subpart of the GO graph',
+            description='This method will extract all the children '
             'of a given GO terms.')
-        go_parser.add_argument('term', default=None,
-            help = 'The GO term for which to retrieve all the children.')
-        go_parser.add_argument('--check-unique', default=False,
+        go_parser.add_argument(
+            'term',
+            default=None,
+            help='The GO term for which to retrieve all the children.')
+        go_parser.add_argument(
+            '--check-unique',
+            default=False,
             action='store_true',
-            help = 'Check for duplicate term while loading the ontology. '
+            help='Check for duplicate term while loading the ontology. '
             'This will greatly increase the loading time but will warn '
             'you if an identifier is double.')
-        go_parser.add_argument('--ontology', default=None,
-            help = 'Name of the ontology file to use. If none is '
+        go_parser.add_argument(
+            '--ontology',
+            default=None,
+            help='Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.set_defaults(command = self.action_subpart)
+        go_parser.set_defaults(command=self.action_subpart)
 
     def set_action_tree(self):
         """ Set up the parser for the tree action. """
-        go_parser = self.subparsers.add_parser('tree',
-            help = 'Display the tree of ancester for a given GO term',
-            description = 'For a specified GO term, display its direct '
+        go_parser = self.subparsers.add_parser(
+            'tree',
+            help='Display the tree of ancester for a given GO term',
+            description='For a specified GO term, display its direct '
             'ancesters up to the top of the tree.')
-        go_parser.add_argument('term', default=None,
-            help = 'The GO term for which to print the tree.')
-        go_parser.add_argument('--check-unique', default=False,
+        go_parser.add_argument(
+            'term',
+            default=None,
+            help='The GO term for which to print the tree.')
+        go_parser.add_argument(
+            '--check-unique',
+            default=False,
             action='store_true',
-            help = 'Check for duplicate term while loading the ontology. '
+            help='Check for duplicate term while loading the ontology. '
             'This will greatly increase the loading time but will warn '
             'you if an identifier is double.')
-        go_parser.add_argument('--ontology', default=None,
-            help = 'Name of the ontology file to use. If none is '
+        go_parser.add_argument(
+            '--ontology',
+            default=None,
+            help='Name of the ontology file to use. If none is '
             'precised, it will download the one from geneontology '
             'directly and use that one.')
-        go_parser.set_defaults(command = self.action_tree)
+        go_parser.set_defaults(command=self.action_tree)
 
 
 if __name__ == '__main__':
