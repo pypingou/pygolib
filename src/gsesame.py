@@ -3,7 +3,7 @@
 """
 This project is licensed under the New BSD License:
 
-Copyright (c) 2012, Pierre-Yves Chibon
+Copyright (c) 2012-2013, Pierre-Yves Chibon
 
 All rights reserved.
 
