@@ -13,7 +13,7 @@ setup(
     author_email='pingou@pingoured.fr',
     version=__version__,
     license='BSD',
-    url='https://github.com/PBR/pygolib/',
+    url='https://github.com/pypingou/pygolib/',
     package_dir={'pygolib': 'src'},
     packages=['pygolib'],
     scripts=["goutil"],
