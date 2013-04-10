@@ -3,7 +3,7 @@
 """
 This project is licensed under the New BSD License:
 
-Copyright (c) 2012, Pierre-Yves Chibon
+Copyright (c) 2012-2013, Pierre-Yves Chibon
 
 All rights reserved.
 
@@ -44,6 +44,7 @@ logging.basicConfig()
 LOG = logging.getLogger('golib')
 LOG.setLevel(logging.INFO)
 
+
 class PyGoLibException(Exception):
     """ This is the class used for all potential exception which can be
     generated while running this project.
@@ -63,7 +64,7 @@ class PyGoLib(object):
         self.subgraph = {}
 
     def __do_handle_parent(self, termid, level, pred, paths,
-        verbose=False, details=False, rtype=""):
+                           verbose=False, details=False, rtype=""):
         """ Handle the output for one parent of a term.
         It will retrieve the GO term for the given ID, add it to the pred
         building up the path and keep building the upper part of the
@@ -93,16 +94,16 @@ class PyGoLib(object):
                 pred = '%s,%s' % (pred, parentid)
         parent = self.graph[parentid]
         self.get_path(parent, level=level + 1,
-                pred=pred, paths=paths, verbose=verbose,
-                details=details)
+                      pred=pred, paths=paths, verbose=verbose,
+                      details=details)
 
     def fix_go_graph(self):
         """ Add a root node to the main three categories. This way we
         can always link different terms even if they are in separate
         branch.
         """
-        info = {'id' : 'GO:OOOO000', 'name' : 'root'}
-        root = {'id' : info['id'], 'info' : info}
+        info = {'id': 'GO:OOOO000', 'name': 'root'}
+        root = {'id': info['id'], 'info': info}
         self.graph[root['id']] = root
         for goid in ['GO:0008150', 'GO:0005575', 'GO:0003674']:
             try:
@@ -122,7 +123,7 @@ class PyGoLib(object):
             if verbose:
                 print term['id']
             pathways = self.get_path(term, pred=term['id'], paths=[],
-                verbose=verbose)
+                                     verbose=verbose)
             for step in pathways:
                 if termid in step:
                     for tid in step.split(termid)[0].split(','):
@@ -133,7 +134,7 @@ class PyGoLib(object):
         return self.subgraph
 
     def get_path(self, term, level=0, pred="", paths=[], verbose=False,
-        details=False):
+                 details=False):
         """ This is an iterative method which is used to retrieve the top
         parent of a given term.
         """
@@ -141,24 +142,28 @@ class PyGoLib(object):
             if isinstance(term['is_a'], list):
                 before = pred
                 for parent in term['is_a']:
-                    self.__do_handle_parent(parent, level, before, paths,
+                    self.__do_handle_parent(
+                        parent, level, before, paths,
                         verbose=verbose, details=details, rtype='is_a')
             else:
-                self.__do_handle_parent(term['is_a'], level, pred, paths,
+                self.__do_handle_parent(
+                    term['is_a'], level, pred, paths,
                     verbose=verbose, details=details, rtype='is_a')
         if details and 'part_of' in term.keys():
             if isinstance(term['part_of'], list):
                 before = pred
                 for parent in term['part_of']:
-                    self.__do_handle_parent(parent, level, before, paths,
+                    self.__do_handle_parent(
+                        parent, level, before, paths,
                         verbose=verbose, details=details, rtype='part_of')
             else:
-                self.__do_handle_parent(term['part_of'], level, pred, paths,
+                self.__do_handle_parent(
+                    term['part_of'], level, pred, paths,
                     verbose=verbose, details=details, rtype='part_of')
         if 'is_a' not in term.keys() and 'part_of' not in term.keys():
             paths.append(pred)
         return paths
-    
+
 
 def get_logger():
     """ Return the logger. """
@@ -186,7 +191,7 @@ def download_go_graph(outputfile=None, force_dl=False):
     False.
     """
     LOG.debug('download_go_graph: outputfile %s - force_dl %s' %
-        (outputfile, force_dl))
+              (outputfile, force_dl))
     if not outputfile:
         go_file = 'geneontology-%s.obo' % \
             datetime.datetime.now().strftime('%Y%m%d')

@@ -3,7 +3,7 @@
 """
 This project is licensed under the New BSD License:
 
-Copyright (c) 2012, Pierre-Yves Chibon
+Copyright (c) 2012-2013, Pierre-Yves Chibon
 
 All rights reserved.
 
@@ -107,7 +107,7 @@ class GoDistanceCounter(object):
                     if not mindist or dist < mindist:
                         mindist = dist
                         deltalevel = deltaleveltmp
-        if mindist != None and deltalevel != None:
+        if mindist is not None and deltalevel is not None:
             return (mindist, deltalevel)
         else:
             return None
@@ -161,14 +161,14 @@ class GoDistanceCounter(object):
         # account alt_id which are in the list of goterms but not in the
         # paths. Via goterm['id'] we get the 'normal' GO term identifier.
         scores = self.__score_parents(goterm1['id'], goterm2['id'],
-            path1, path2)
+                                      path1, path2)
         if scores:
             score = min(scores)
             self.log.debug("%s and %s are parents" % (id1, id2))
             return (score, score)
         else:
             score = self.__score_cousins(goterm1['id'], goterm2['id'],
-                path1, path2)
+                                         path1, path2)
             return score
 
 

@@ -48,6 +48,7 @@ except ImportError:
     sys.path.insert(0, os.path.abspath('../'))
     from src import get_logger, PyGoLib
 
+
 def _get_ancester(path1, path2):
     """ For two given path, return the first common ancester.
     :arg path1, a list of nodes.
@@ -58,13 +59,14 @@ def _get_ancester(path1, path2):
             return step
     return None
 
+
 def _get_all_ancesters(path):
     """ For a given path, return all the ancesters in it. """
     ancesters = []
     for step in path:
         for item in step.split(','):
             if item not in ['is_a', 'part_of'] \
-                and item not in ancesters:
+                    and item not in ancesters:
                 ancesters.append(item)
     return ancesters
 
@@ -103,7 +105,7 @@ class GsesameGO(object):
         golib = PyGoLib(self.goterms)
         goterm1 = self.goterms[id1]
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[],
-            details=True)
+                               details=True)
 
         semantic_values = {}
         for ancester in _get_all_ancesters(path1):
@@ -116,7 +118,7 @@ class GsesameGO(object):
                 if ancester in item:
                     path_el = item.split(',')
                     ind = path_el.index(ancester)
-                    for step in range(ind -1, 0, -2):
+                    for step in range(ind - 1, 0, -2):
                         if path_el[step] == 'is_a':
                             tmp_cnt = tmp_cnt * 0.8
                         elif path_el[step] == 'part_of':
@@ -136,18 +138,18 @@ class GsesameGO(object):
         #golib.fix_go_graph()
         goterm1 = self.goterms[id1]
         path1 = golib.get_path(goterm1, pred=goterm1['id'], paths=[],
-            details=True)
+                               details=True)
         #print goterm1['id'], len(path1)
         ancester1 = _get_all_ancesters(path1)
         semantic_values1 = self.semantic_values(goterm1['id'])
 
         goterm2 = self.goterms[id2]
         path2 = golib.get_path(goterm2, pred=goterm2['id'], paths=[],
-            details=True)
+                               details=True)
         #print goterm2['id'], len(path2)
         ancester2 = _get_all_ancesters(path2)
         semantic_values2 = self.semantic_values(goterm2['id'])
-        
+
         common_ancester = list(set(ancester1).intersection(set(ancester2)))
         sum_comm_anc = 0
         for ancester in common_ancester:
@@ -155,7 +157,7 @@ class GsesameGO(object):
                 semantic_values1[ancester]
 
         score = sum_comm_anc / (sum(semantic_values1.values())
-            + sum(semantic_values2.values()))
+                                + sum(semantic_values2.values()))
         return score
 
 
@@ -215,13 +217,13 @@ if __name__ == '__main__':
     print 'GO:0043229 semantic value:', GSGO.semantic_value('GO:0043229')
     print 'GO:0043231 semantic value:', GSGO.semantic_value('GO:0043231')
     print 'Score for: GO:0043229 - GO:0043231:', \
-        GSGO.scores('GO:0043229','GO:0043231')
+        GSGO.scores('GO:0043229', 'GO:0043231')
 
     # G-Sesame Gene example
     GSGENE = GsesameGene(TERMS)
     GENE1 = ['GO:0004022', 'GO:0004024', 'GO:0004174', 'GO:0046872',
-        'GO:0008270', 'GO:0004023']
+             'GO:0008270', 'GO:0004023']
     GENE2 = ['GO:0009055', 'GO:0005515', 'GO:0046872', 'GO:0008270',
-        'GO:0020037']
+             'GO:0020037']
     print 'Semantic similarities between the two genes:', \
         GSGENE.scores(GENE1, GENE2)

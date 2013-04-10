@@ -3,7 +3,7 @@
 """
 This project is licensed under the New BSD License:
 
-Copyright (c) 2012, Pierre-Yves Chibon
+Copyright (c) 2012-213, Pierre-Yves Chibon
 
 All rights reserved.
 
@@ -96,8 +96,9 @@ class OboIO (object):
                 elif info['id'] not in self.graph:
                     self.graph[info['id']] = info
                 else:
-                    self.log.warning('%s is present several time in the ontology' %
-                    info['id'])
+                    self.log.warning(
+                        '%s is present several time in the ontology' %
+                        info['id'])
 
                 if 'alt_id' in info:
                     alt_ids = info['alt_id']
@@ -108,8 +109,8 @@ class OboIO (object):
                             self.graph[alt_ids] = info
                         else:
                             self.log.warning(
-                            '%s is present several time in the ontology' %
-                            info['id'])
+                                '%s is present several time in the ontology' %
+                                info['id'])
                     elif isinstance(alt_ids, list):
                         for ids in alt_ids:
                             if no_check_unique:
@@ -118,8 +119,9 @@ class OboIO (object):
                                 self.graph[ids] = info
                             else:
                                 self.log.warning(
-                                '%s is present several time in the ontology' %
-                                info['id'])
+                                    '%s is present several '
+                                    'time in the ontology' %
+                                    info['id'])
         self.log.info("%s GO terms retrieved" % len(self.graph))
         return self.graph
 
